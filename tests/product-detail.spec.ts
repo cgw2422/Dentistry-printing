@@ -187,10 +187,18 @@ test.describe("configuration and pricing", () => {
 
   test("offers a quote rather than an operational cart", async ({ page }) => {
     await page.goto(BUSINESS_CARDS);
-    await expect(page.getByRole("link", { name: /Request a Quote/ }).first()).toHaveAttribute(
-      "href",
-      "/request-a-quote",
+
+    // Every quote call to action leads to the real form, and the one beside the
+    // configurator carries the product so the form opens pre-selected.
+    const quoteLinks = page.getByRole("link", { name: /Request a Quote/ });
+    const hrefs = await quoteLinks.evaluateAll((links) =>
+      links.map((link) => link.getAttribute("href") ?? ""),
     );
+    expect(hrefs.length).toBeGreaterThan(0);
+    for (const href of hrefs) {
+      expect(href).toMatch(/^\/request-a-quote(\?|$)/);
+    }
+    expect(hrefs).toContain("/request-a-quote?product=business-cards");
     await expect(page.getByRole("button", { name: /add to cart/i })).toHaveCount(0);
     await expect(page.getByRole("link", { name: /add to cart/i })).toHaveCount(0);
   });

@@ -56,9 +56,12 @@ const ASSURANCES = [
 export function ProductConfigurator({
   optionGroups,
   productName,
+  productSlug,
 }: {
   optionGroups: OptionGroup[];
   productName: string;
+  /** Preselects this product on the quote form. */
+  productSlug: string;
 }) {
   const pendingId = "specifications-pending";
   const hasPending = optionGroups.some(
@@ -98,7 +101,13 @@ export function ProductConfigurator({
       </div>
 
       <div className="mt-5 flex flex-col gap-3">
-        <Button href="/request-a-quote" variant="onDark" size="lg" withArrow className="w-full">
+        <Button
+          href={`/request-a-quote?product=${encodeURIComponent(productSlug)}`}
+          variant="onDark"
+          size="lg"
+          withArrow
+          className="w-full"
+        >
           Request a Quote
         </Button>
         <Button href="/custom-design" variant="secondary" size="lg" className="w-full">

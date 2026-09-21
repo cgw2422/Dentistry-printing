@@ -1,3 +1,5 @@
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 
@@ -8,6 +10,9 @@ import { Container } from "@/components/ui/Container";
  */
 export default function NotFound() {
   return (
+    <>
+      <Header />
+      <main id="main">
     <section className="bg-linear-to-b from-sky-50 to-white py-20 sm:py-28">
       <Container>
         <div className="mx-auto flex max-w-xl flex-col items-start gap-5 text-left sm:items-center sm:text-center">
@@ -27,5 +32,8 @@ export default function NotFound() {
         </div>
       </Container>
     </section>
+      </main>
+      <Footer />
+    </>
   );
 }

@@ -78,6 +78,7 @@ export function ProductDetailPage({ resolved }: { resolved: ResolvedProduct }) {
                 <ProductConfigurator
                   optionGroups={detail.optionGroups}
                   productName={product.name.toLowerCase()}
+                  productSlug={product.slug}
                 />
               </div>
 

@@ -81,7 +81,7 @@ test.describe("Printing Products page", () => {
     });
     await expect(custom.getByRole("link", { name: /Request a Custom Quote/ })).toHaveAttribute(
       "href",
-      "/request-a-quote",
+      "/request-a-quote?product=custom-printing",
     );
   });
 

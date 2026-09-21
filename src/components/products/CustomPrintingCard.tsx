@@ -28,7 +28,7 @@ export function CustomPrintingCard({ product }: { product: ProductEntry }) {
         <p className="hidden text-sm leading-relaxed text-sky-100/85 sm:block">{product.blurb}</p>
 
         <Link
-          href="/request-a-quote"
+          href={`/request-a-quote?product=${encodeURIComponent(product.slug)}`}
           className="mt-auto inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-teal px-3 py-2.5 text-center text-xs font-semibold leading-snug text-white transition-colors hover:bg-teal-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky sm:px-4 sm:text-sm"
         >
           Request a Custom Quote

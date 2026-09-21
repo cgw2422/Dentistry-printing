@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
 import { MockupDefs } from "@/components/mockups/MockupDefs";
 import { brand } from "@/content/site";
 import { poppins } from "./fonts";
 import "./globals.css";
 
+/**
+ * Document shell only. The marketing header and footer live in the `(site)`
+ * route group, so internal areas such as `/owner` do not inherit them.
+ */
 export const metadata: Metadata = {
   title: {
     default: `${brand.name} — Printing & Direct Mail for Dental Practices`,
@@ -31,9 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <MockupDefs />
-        <Header />
-        <main id="main">{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   );

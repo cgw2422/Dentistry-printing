@@ -1,0 +1,290 @@
+// Dentistry Printing — database schema.
+//
+// Scope note: this phase ships the quote-request system and the owner login
+// that protects it. The organization / membership tables exist because the
+// authorization model has to be right from the start — a practice owner must
+// never gain platform privileges — but customer registration, portals and
+// orders are NOT built yet.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/* ------------------------------------------------------------------ */
+/* Platform identity                                                   */
+/* ------------------------------------------------------------------ */
+
+/// Platform-wide capability. Deliberately separate from OrganizationRole:
+/// owning a dental practice must never confer platform administration.
+enum PlatformRole {
+  PLATFORM_ADMIN
+  PLATFORM_STAFF
+  CUSTOMER
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?   @db.VarChar(200)
+  email         String    @unique @db.VarChar(320)
+  emailVerified DateTime?
+  image         String?   @db.VarChar(2048)
+
+  /// scrypt hash; null for accounts that will sign in another way later.
+  passwordHash String? @db.VarChar(512)
+
+  platformRole PlatformRole @default(CUSTOMER)
+  status       UserStatus   @default(ACTIVE)
+
+  /// Bumped to invalidate every issued session for this user at once.
+  /// Credentials sign-in forces JWT sessions, which cannot be deleted
+  /// server-side; every authorization check compares this against the token.
+  sessionEpoch Int @default(1)
+
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  memberships OrganizationMembership[]
+  quoteNotes  QuoteNote[]
+
+  @@index([platformRole])
+  @@index([status])
+}
+
+/* Auth.js adapter tables. Unused by credentials sign-in, present so an OAuth
+   or magic-link provider can be added later without a migration. */
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/* ------------------------------------------------------------------ */
+/* Organizations — dental practices                                    */
+/* ------------------------------------------------------------------ */
+
+/// Role held *within one practice*. Never grants platform access.
+enum OrganizationRole {
+  ORG_OWNER
+  ORG_MANAGER
+  ORG_STAFF
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String   @db.VarChar(200)
+  slug      String   @unique @db.VarChar(120)
+  website   String?  @db.VarChar(2048)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locations     OrganizationLocation[]
+  memberships   OrganizationMembership[]
+  quoteRequests QuoteRequest[]
+}
+
+/// A practice can have several locations under one account.
+model OrganizationLocation {
+  id             String  @id @default(cuid())
+  organizationId String
+  name           String  @db.VarChar(200)
+  addressLine1   String? @db.VarChar(200)
+  addressLine2   String? @db.VarChar(200)
+  city           String? @db.VarChar(120)
+  region         String? @db.VarChar(120)
+  postalCode     String? @db.VarChar(20)
+  isPrimary      Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+/// A user may belong to several practices, with a different role in each.
+model OrganizationMembership {
+  id             String           @id @default(cuid())
+  userId         String
+  organizationId String
+  role           OrganizationRole @default(ORG_STAFF)
+  createdAt      DateTime         @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+/* ------------------------------------------------------------------ */
+/* Quote requests                                                      */
+/* ------------------------------------------------------------------ */
+
+enum QuoteStatus {
+  NEW
+  REVIEWING
+  AWAITING_INFORMATION
+  QUOTED
+  ACCEPTED
+  DECLINED
+  CLOSED
+}
+
+enum ArtworkStatus {
+  HAS_PRINT_READY_ARTWORK
+  HAS_BRANDING_NEEDS_DESIGN_HELP
+  NEEDS_DESIGN
+  NOT_SURE
+}
+
+enum EmailDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  /// No provider configured, so nothing was attempted.
+  SKIPPED
+}
+
+/// A quote request stands on its own: no account is required to submit one,
+/// and `organizationId` stays null until a practice account claims it.
+model QuoteRequest {
+  id String @id @default(cuid())
+
+  /// Short human-readable reference used in emails. Not a URL key: the
+  /// confirmation page reads a signed cookie, never an id from the address bar.
+  reference String @unique @db.VarChar(20)
+
+  practiceName String  @db.VarChar(200)
+  contactName  String  @db.VarChar(200)
+  email        String  @db.VarChar(320)
+  phone        String  @db.VarChar(40)
+  website      String? @db.VarChar(2048)
+
+  productKey    String  @db.VarChar(80)
+  productLabel  String  @db.VarChar(200)
+  quantity      String? @db.VarChar(120)
+  dimensions    String? @db.VarChar(200)
+  paperOrFinish String? @db.VarChar(200)
+
+  specifications      String?   @db.VarChar(4000)
+  desiredDeliveryDate DateTime? @db.Date
+  shippingPostalCode  String?   @db.VarChar(20)
+
+  mailingArea         String?  @db.VarChar(500)
+  householdEstimate   String?  @db.VarChar(120)
+  campaignGoal        String?  @db.VarChar(1000)
+  needsPostcardDesign Boolean?
+
+  artworkStatus ArtworkStatus
+  message       String?       @db.VarChar(5000)
+
+  /// When the contact consent box was ticked. Required to submit.
+  consentAt DateTime
+
+  status        QuoteStatus @default(NEW)
+  internalNotes QuoteNote[]
+
+  /// Idempotency key minted by the form; a retried POST returns the same row.
+  submissionToken String @unique @db.VarChar(64)
+
+  /// Salted hash, never a raw address: enough to rate-limit, not to identify.
+  ipHash    String? @db.VarChar(64)
+  userAgent String? @db.VarChar(500)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  ownerEmailStatus   EmailDeliveryStatus @default(PENDING)
+  ownerEmailSentAt   DateTime?
+  ownerEmailError    String?             @db.VarChar(500)
+  ownerEmailAttempts Int                 @default(0)
+
+  customerEmailStatus   EmailDeliveryStatus @default(PENDING)
+  customerEmailSentAt   DateTime?
+  customerEmailError    String?             @db.VarChar(500)
+  customerEmailAttempts Int                 @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+  @@index([email])
+  @@index([organizationId])
+  @@index([ipHash, createdAt])
+}
+
+/// Private to platform staff. Never sent to the customer or rendered publicly.
+model QuoteNote {
+  id             String   @id @default(cuid())
+  quoteRequestId String
+  authorId       String?
+  body           String   @db.VarChar(4000)
+  createdAt      DateTime @default(now())
+
+  quoteRequest QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade)
+  author       User?        @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([quoteRequestId, createdAt])
+}
+
+/// Backs login rate limiting and brute-force lockout. Identifiers are hashed
+/// so the table cannot be used to enumerate who tried to sign in.
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  emailHash String   @db.VarChar(64)
+  ipHash    String   @db.VarChar(64)
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([emailHash, createdAt])
+  @@index([ipHash, createdAt])
+}
