@@ -36,9 +36,31 @@ npm run dev          # http://localhost:3000
 | `npm run lint`      | ESLint                                             |
 | `npm run typecheck` | `tsc --noEmit`                                     |
 | `npm test`          | Playwright suite; builds and serves on port 3100   |
+| `npm run build:preview` | Static export into `out/`, for the shareable preview |
 
 The test suite needs a Chromium. Either run `npx playwright install chromium`, or
 point `PLAYWRIGHT_CHROMIUM_PATH` at an existing binary if your CI image pins one.
+
+## Deploying to Railway
+
+Railway runs `npm run build` then `npm run start`. No environment variables,
+database or payment setup are needed yet, and `next start` picks up Railway's
+`PORT` on its own.
+
+**Do not put Next's static-export mode in `next.config.ts`** — not in a comment,
+and not in a conditional branch that is switched off by default. Railway's
+builder scans that file as text rather than evaluating it; if it finds the
+setting it packages the app as a static site and then fails on a directory a
+normal build never produces:
+
+```
+failed to compute cache key: "/app/out": not found
+```
+
+The shareable preview does need a static export. `npm run build:preview`
+supplies that config for the length of one build and restores the file
+afterwards, so the committed config stays deployable. `tests/deploy-config.spec.ts`
+fails the suite if the setting ever reappears.
 
 ## Project structure
 
@@ -63,7 +85,9 @@ src/
     home/               One component per homepage section
     products/           Catalogue view, search field and URL helpers
 public/photos/          Where licensed patient photography goes (see photos.ts)
-docs/screenshots/       Screenshots of the built homepage
+scripts/build-preview.mjs  Static export for the preview, without touching the
+                        deployed config
+docs/screenshots/       Screenshots of the built pages
 tests/                  Homepage and Printing Products checks
 ```
 

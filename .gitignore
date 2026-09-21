@@ -45,3 +45,6 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# preview build safety net (see scripts/build-preview.mjs)
+/next.config.ts.orig
