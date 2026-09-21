@@ -202,6 +202,47 @@ test.describe("responsive layout", () => {
     expect(undersized).toEqual([]);
   });
 
+  test("hero CTAs sit on one row on desktop", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "desktop layout only");
+    await page.goto("/");
+    // These two buttons wrap the moment the text column gets too narrow, which
+    // is the first thing to break when the hero proportions are retuned.
+    const shop = page.getByRole("link", { name: "Shop Printing Products" }).first();
+    const mail = page.getByRole("link", { name: "Start a Direct Mail Campaign" }).first();
+    const a = await shop.boundingBox();
+    const b = await mail.boundingBox();
+    expect(a).not.toBeNull();
+    expect(b).not.toBeNull();
+    expect(Math.round(a!.y)).toBe(Math.round(b!.y));
+  });
+
+  test("product tiles fill their grid column and line up", async ({ page }) => {
+    await page.goto("/");
+    // Cards used to size to their own text, so a tile with a short blurb came
+    // out narrower than its column and its label sat at a different height.
+    const rows = await page.evaluate(() => {
+      const cards = Array.from(document.querySelectorAll('a[href^="/printing-products/"]')).filter(
+        (el) => el.querySelector("h3"),
+      );
+      const byRow = new Map<number, { w: number; top: number; bottom: number }[]>();
+      for (const el of cards) {
+        const r = el.getBoundingClientRect();
+        const key = Math.round(r.top / 8);
+        if (!byRow.has(key)) byRow.set(key, []);
+        byRow.get(key)!.push({ w: Math.round(r.width), top: Math.round(r.top), bottom: Math.round(r.bottom) });
+      }
+      return Array.from(byRow.values()).filter((r) => r.length > 1);
+    });
+
+    expect(rows.length).toBeGreaterThan(0);
+    for (const row of rows) {
+      const widths = new Set(row.map((c) => c.w));
+      expect([...widths]).toHaveLength(1);
+      const bottoms = new Set(row.map((c) => c.bottom));
+      expect([...bottoms]).toHaveLength(1);
+    }
+  });
+
   test("no two text blocks overlap", async ({ page }) => {
     await page.goto("/");
     const collisions = await page.evaluate(() => {

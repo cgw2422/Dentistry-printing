@@ -4,15 +4,15 @@ import { Container } from "@/components/ui/Container";
 
 export function FinalCta() {
   return (
-    <section className="bg-white pb-14 sm:pb-16 lg:pb-20">
+    <section className="bg-white pb-10 sm:pb-14 lg:pb-20">
       <Container>
-        <div className="relative overflow-hidden rounded-3xl bg-navy px-6 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
+        <div className="relative overflow-hidden rounded-3xl bg-navy px-6 py-9 sm:px-10 sm:py-12 lg:px-14 lg:py-16">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-teal/20 blur-3xl"
           />
 
-          <div className="relative flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+          <div className="relative flex flex-col gap-6 sm:gap-7 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
             <div className="flex items-start gap-4 sm:gap-6">
               <ToothMark variant="light" className="h-12 w-auto shrink-0 sm:h-16" />
               <div>

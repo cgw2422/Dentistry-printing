@@ -34,7 +34,7 @@ export function SectionHeading({
 
   const body = children && (
     <p
-      className={`max-w-xl text-[0.9375rem] leading-relaxed sm:text-base ${
+      className={`max-w-xl text-[0.9375rem] leading-relaxed sm:text-base lg:text-[1.0625rem] ${
         dark ? "text-sky-100/85" : "text-muted"
       }`}
     >

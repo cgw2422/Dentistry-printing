@@ -22,21 +22,21 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="bg-white py-14 sm:py-16 lg:py-20">
+    <section className="bg-white py-10 sm:py-14 lg:py-20">
       <Container>
-        <div className="grid gap-9 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.6fr)] lg:gap-14">
+        <div className="grid gap-7 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.6fr)] lg:gap-14">
           <SectionHeading title="How It Works">
             Ordering professional dental printing is simple.
           </SectionHeading>
 
-          <ol className="relative flex flex-col gap-7 lg:flex-row lg:gap-8">
+          <ol className="relative flex flex-col gap-6 lg:flex-row lg:gap-8">
             {steps.map(({ icon: Icon, title, body }, index) => (
               <li key={title} className="relative flex gap-4 lg:flex-col lg:gap-4">
                 {/* Connector rail: vertical on mobile, horizontal on desktop. */}
                 {index < steps.length - 1 && (
                   <span
                     aria-hidden="true"
-                    className="absolute left-[1.375rem] top-12 h-[calc(100%+1.75rem-3rem)] w-px bg-line lg:left-12 lg:top-[1.375rem] lg:h-px lg:w-[calc(100%-1rem)]"
+                    className="absolute left-[1.375rem] top-12 h-[calc(100%+1.5rem-3rem)] w-px bg-line lg:left-12 lg:top-[1.375rem] lg:h-px lg:w-[calc(100%-1rem)]"
                   />
                 )}
 
@@ -46,8 +46,12 @@ export function HowItWorks() {
 
                 <div className="flex flex-col gap-1.5 pt-1 lg:pt-0">
                   <Icon className="mb-1 h-7 w-7 text-teal" />
-                  <h3 className="text-base font-bold leading-snug text-navy">{title}</h3>
-                  <p className="max-w-xs text-sm leading-relaxed text-muted">{body}</p>
+                  <h3 className="text-base font-bold leading-snug text-navy lg:text-[1.0625rem]">
+                    {title}
+                  </h3>
+                  <p className="max-w-xs text-sm leading-relaxed text-muted lg:text-[0.9375rem]">
+                    {body}
+                  </p>
                 </div>
               </li>
             ))}

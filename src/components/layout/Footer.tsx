@@ -10,10 +10,12 @@ export function Footer() {
   return (
     <footer className="border-t border-line bg-white">
       <Container>
-        <div className="grid gap-10 py-12 sm:py-14 lg:grid-cols-[minmax(0,1.15fr)_repeat(3,minmax(0,1fr))] lg:gap-8 lg:py-16">
+        <div className="grid gap-7 py-10 sm:gap-10 sm:py-14 lg:grid-cols-[minmax(0,1.15fr)_repeat(3,minmax(0,1fr))] lg:gap-8 lg:py-16">
           <div className="flex flex-col gap-4">
             <Logo />
-            <p className="max-w-xs text-sm leading-relaxed text-muted">{brand.description}</p>
+            <p className="max-w-xs text-sm leading-relaxed text-muted lg:text-[0.9375rem]">
+              {brand.description}
+            </p>
             <Link
               href="/request-a-quote"
               className="inline-flex items-center gap-1.5 py-1 text-sm font-semibold text-teal-700 underline-offset-4 hover:underline"

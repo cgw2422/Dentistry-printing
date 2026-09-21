@@ -23,7 +23,7 @@ export function Hero() {
       />
 
       <Container className="relative">
-        <div className="grid items-center gap-10 py-10 sm:py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-8 lg:py-20">
+        <div className="grid items-center gap-7 py-8 sm:gap-10 sm:py-12 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,1fr)] lg:gap-10 lg:py-14">
           <div className="flex flex-col">
             <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-navy/70 sm:text-xs sm:tracking-[0.22em]">
               Printing &amp; Direct Mail for Dental Practices
@@ -33,12 +33,12 @@ export function Hero() {
               Professional Printing for <span className="text-teal">Dental Practices.</span>
             </h1>
 
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-muted sm:mt-5 sm:text-lg">
               From everyday practice essentials to complete new-patient direct-mail campaigns,
               we make professional dental printing simple.
             </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+            <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-4">
               <Button
                 href="/printing-products"
                 variant="onDark"
@@ -58,11 +58,11 @@ export function Hero() {
               </Button>
             </div>
 
-            <ul className="mt-9 grid grid-cols-3 gap-x-3 gap-y-5 sm:gap-x-6 lg:mt-10">
+            <ul className="mt-8 grid grid-cols-3 gap-x-3 gap-y-5 sm:gap-x-6 lg:mt-9">
               {highlights.map(({ icon: Icon, title, detail }) => (
                 <li key={title} className="flex flex-col items-start gap-2 sm:flex-row sm:gap-3">
                   <Icon className="h-6 w-6 shrink-0 text-teal sm:h-7 sm:w-7" />
-                  <span className="text-[0.8125rem] font-semibold leading-snug text-navy sm:text-sm">
+                  <span className="text-[0.8125rem] font-semibold leading-snug text-navy sm:text-[0.9375rem]">
                     {title}
                     <span className="block font-medium text-muted">{detail}</span>
                   </span>
@@ -71,7 +71,7 @@ export function Hero() {
             </ul>
           </div>
 
-          <div className="relative -mx-1 mt-2 lg:mx-0 lg:mt-0">
+          <div className="relative -mx-2 sm:-mx-1 lg:mx-0 lg:-mr-8 2xl:-mr-20">
             <HeroArrangement className="h-auto w-full" />
           </div>
         </div>

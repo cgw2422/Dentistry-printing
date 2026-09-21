@@ -92,38 +92,38 @@ export function BrochureStanding() {
 export function HeroArrangement({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 660 452"
+      viewBox="0 0 664 428"
       className={className}
       role="img"
       aria-label="Printed dental marketing materials: a new-patient postcard, a tri-fold patient brochure, a stack of business cards and a stack of appointment reminder cards."
     >
       {/* Surface the whole group sits on. */}
-      <Ground cx={330} cy={418} rx={286} ry={26} opacity={0.12} />
+      <Ground cx={332} cy={404} rx={300} ry={26} opacity={0.12} />
 
-      <Ground cx={528} cy={212} rx={128} ry={14} />
-      <Piece transform="translate(398 14) scale(1.1)">
+      <Ground cx={524} cy={196} rx={134} ry={14} />
+      <Piece transform="translate(384 2) scale(1.18)">
         <BrochureStanding />
       </Piece>
 
-      <Ground cx={548} cy={366} rx={52} ry={11} />
-      <Piece transform="translate(506 218) scale(0.84) rotate(4)">
+      <Ground cx={548} cy={342} rx={54} ry={11} />
+      <Piece transform="translate(514 190) scale(0.88) rotate(4)">
         <RackCardFace />
       </Piece>
 
-      <Ground cx={220} cy={250} rx={172} ry={16} />
-      <Piece transform="translate(52 20) scale(1.78) rotate(-2.5)">
+      <Ground cx={206} cy={244} rx={184} ry={16} />
+      <Piece transform="translate(22 4) scale(1.92) rotate(-2.5)">
         <PostcardSmile />
       </Piece>
 
-      <Ground cx={122} cy={400} rx={100} ry={13} />
-      <Piece transform="translate(30 276) rotate(-4)">
+      <Ground cx={112} cy={390} rx={104} ry={13} />
+      <Piece transform="translate(10 258) scale(1.07) rotate(-4)">
         <CardStack layers={8}>
           <BusinessCardFace />
         </CardStack>
       </Piece>
 
-      <Ground cx={362} cy={424} rx={100} ry={13} />
-      <Piece transform="translate(272 300) rotate(3)">
+      <Ground cx={358} cy={414} rx={108} ry={13} />
+      <Piece transform="translate(236 282) scale(1.09) rotate(3)">
         <CardStack layers={6}>
           <AppointmentCardFace />
         </CardStack>
@@ -242,7 +242,7 @@ function TileArt({ mockup }: { mockup: MockupKey }) {
   switch (mockup) {
     case "appointmentCards":
       return (
-        <Piece transform="translate(34 24) scale(0.96) rotate(-4)">
+        <Piece transform="translate(20 16) scale(1.1) rotate(-4)">
           <CardStack layers={6}>
             <AppointmentCardFace />
           </CardStack>
@@ -250,7 +250,7 @@ function TileArt({ mockup }: { mockup: MockupKey }) {
       );
     case "businessCards":
       return (
-        <Piece transform="translate(32 24) scale(0.98) rotate(-5)">
+        <Piece transform="translate(20 16) scale(1.1) rotate(-5)">
           <CardStack layers={8}>
             <BusinessCardFace />
           </CardStack>
@@ -258,7 +258,7 @@ function TileArt({ mockup }: { mockup: MockupKey }) {
       );
     case "referralCards":
       return (
-        <Piece transform="translate(32 24) scale(0.96) rotate(-4)">
+        <Piece transform="translate(20 16) scale(1.1) rotate(-4)">
           <CardStack layers={6}>
             <ReferralCardFace />
           </CardStack>
@@ -267,37 +267,37 @@ function TileArt({ mockup }: { mockup: MockupKey }) {
     case "directMailPostcards":
       return (
         <>
-          <Piece transform="translate(64 12) scale(0.82) rotate(7)" soft>
+          <Piece transform="translate(62 4) scale(0.92) rotate(7)" soft>
             <PostcardCommunity />
           </Piece>
-          <Piece transform="translate(22 26) scale(0.94) rotate(-4)">
+          <Piece transform="translate(8 18) scale(1.06) rotate(-4)">
             <PostcardSmile />
           </Piece>
         </>
       );
     case "newPatientPostcards":
       return (
-        <Piece transform="translate(32 20) scale(0.98) rotate(-3)">
+        <Piece transform="translate(20 12) scale(1.1) rotate(-3)">
           <PostcardSmile />
         </Piece>
       );
     case "brochures":
     case "triFoldBrochures":
       return (
-        <Piece transform="translate(30 20) scale(0.74)">
+        <Piece transform="translate(18 6) scale(0.86)">
           <BrochureStanding />
         </Piece>
       );
     case "practiceEssentials":
       return (
         <>
-          <Piece transform="translate(22 16) scale(0.62) rotate(-4)" soft>
+          <Piece transform="translate(12 8) scale(0.72) rotate(-4)" soft>
             <LetterheadFace />
           </Piece>
-          <Piece transform="translate(168 22) scale(0.5) rotate(5)" soft>
+          <Piece transform="translate(180 14) scale(0.58) rotate(5)" soft>
             <RackCardFace />
           </Piece>
-          <Piece transform="translate(64 92) scale(0.6) rotate(-2)">
+          <Piece transform="translate(56 86) scale(0.7) rotate(-2)">
             <EnvelopeFace />
           </Piece>
         </>

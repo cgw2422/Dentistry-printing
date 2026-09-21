@@ -11,6 +11,7 @@
  */
 
 import { MARK_ACCENT_PATH, MARK_OUTLINE_PATH } from "@/components/brand/mark";
+import { patientPhotos, type PatientPhoto } from "@/content/photos";
 
 const NAVY = "#0f2d4a";
 const TEAL = "#00a3b4";
@@ -204,15 +205,38 @@ export function ArtPanel({
   h,
   deep = false,
   showMark = true,
+  photo = null,
+  scrim = 0,
 }: {
   w: number;
   h: number;
   deep?: boolean;
   /** Suppress the tooth watermark where headline type sits over the panel. */
   showMark?: boolean;
+  /** A licensed, model-released photograph. See `src/content/photos.ts`. */
+  photo?: PatientPhoto | null;
+  /** Navy wash over a photo, so overlaid headline type keeps its contrast. */
+  scrim?: number;
 }) {
   const cx = w * 0.52;
   const cy = h * 1.02;
+
+  if (photo) {
+    return (
+      <g>
+        <image
+          href={photo.src}
+          x={0}
+          y={0}
+          width={w}
+          height={h}
+          preserveAspectRatio={`${photo.align ?? "xMidYMid"} slice`}
+        />
+        {scrim > 0 && <rect width={w} height={h} fill={NAVY} opacity={scrim} />}
+      </g>
+    );
+  }
+
   return (
     <g>
       <rect width={w} height={h} fill={deep ? "url(#dp-art-deep)" : "url(#dp-art)"} />
@@ -416,7 +440,7 @@ export function PostcardSmile() {
       <Sheet w={180} h={120} />
       <g clipPath="url(#dp-clip-postcard)">
         <g transform="translate(104 0)">
-          <ArtPanel w={76} h={92} />
+          <ArtPanel w={76} h={92} photo={patientPhotos.newPatientPortrait} />
         </g>
         <Swoosh w={180} h={120} top={92} fill="url(#dp-wave-soft)" opacity={0.3} />
         <Swoosh w={180} h={120} top={100} />
@@ -459,8 +483,17 @@ export function PostcardCommunity() {
     <g>
       <Sheet w={180} h={120} />
       <g clipPath="url(#dp-clip-postcard)">
-        <ArtPanel w={180} h={120} deep showMark={false} />
-        <rect width={180} height={120} fill={NAVY} opacity={0.28} />
+        <ArtPanel
+          w={180}
+          h={120}
+          deep
+          showMark={false}
+          photo={patientPhotos.communityLifestyle}
+          scrim={0.42}
+        />
+        {!patientPhotos.communityLifestyle && (
+          <rect width={180} height={120} fill={NAVY} opacity={0.28} />
+        )}
         <g transform="translate(134 14)" opacity={0.85}>
           <MarkGlyph size={30} outline="#ffffff" accent="#7dd3fc" />
         </g>

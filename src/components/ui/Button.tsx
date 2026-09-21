@@ -18,7 +18,7 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  md: "px-5 py-3 text-[0.9375rem]",
+  md: "px-5 py-3 text-[0.9375rem] lg:text-base",
   lg: "px-7 py-3.5 text-base",
 };
 
@@ -67,7 +67,7 @@ export function TextLink({
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-1.5 py-1 text-[0.9375rem] font-semibold underline-offset-4 hover:underline ${
+      className={`inline-flex items-center gap-1.5 py-1 text-[0.9375rem] font-semibold underline-offset-4 hover:underline lg:text-base ${
         tone === "dark" ? "text-white" : "text-teal-700"
       } ${className}`}
     >
