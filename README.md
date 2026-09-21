@@ -53,12 +53,14 @@ src/
     site.ts             Brand details, primary nav, footer nav
     products.ts         Product categories and featured products
     faqs.ts             Homepage FAQ copy
+    photos.ts           Photography slots on the postcard mockups
   components/
-    brand/              Tooth mark and logo lockup
+    brand/              mark.ts (the tooth paths), ToothMark, Logo lockup
     ui/                 Container, Button, SectionHeading, icons
     layout/             Header (with mobile menu), Footer
     mockups/            Printed-product artwork, drawn as SVG
     home/               One component per homepage section
+public/photos/          Where licensed patient photography goes (see photos.ts)
 docs/screenshots/       Screenshots of the built homepage
 tests/homepage.spec.ts  Content, navigation, FAQ and layout checks
 ```
@@ -106,9 +108,13 @@ dashboard. **The cart badge is a static zero — there is no cart.**
 
 ## Planned phases
 
-1. **Homepage + design system** ← current
-2. Public pages: products, product detail, direct mail, packages, design, about,
-   contact, quote request, legal pages
+Phase 1 is approved. **The remaining phases are a sketch of the likely order, not
+an approved plan.** Pages are specified and approved one at a time: do not build
+a page from this list without its own design and requirements from the owner.
+
+1. **Homepage + design system** — approved
+2. Public pages, one at a time: products, product detail, direct mail, packages,
+   design, about, contact, quote request, legal pages
 3. Database (Postgres + Prisma) and the admin dashboard: products, retail pricing,
    wholesale costs, quotes, orders, payments, artwork, proofs, campaigns,
    fulfillment, revenue and gross profit
@@ -118,3 +124,7 @@ dashboard. **The cart badge is a static zero — there is no cart.**
 
 Supplier orders are submitted manually; no supplier API is assumed. Supplier
 identity, wholesale costs and margins never appear in customer-facing code.
+
+Patient photography is deferred by decision, not blocked: the postcard mockups
+keep their graphic treatment, and `src/content/photos.ts` holds the slots and the
+licensing bar a photo has to clear before it goes in one.
