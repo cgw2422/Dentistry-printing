@@ -742,3 +742,92 @@ export function EnvelopeFace() {
     </g>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Presentation folder — 168 × 216                                     */
+/* ------------------------------------------------------------------ */
+
+/** A 9×12 pocket folder, front cover with the pocket edge and a card slit. */
+export function PresentationFolderFace() {
+  return (
+    <g>
+      <Sheet w={168} h={216} rx={4} />
+      <g clipPath="url(#dp-clip-folder)">
+        <Swoosh w={168} h={216} top={188} fill="url(#dp-wave-soft)" opacity={0.35} />
+        {/* Pocket: angled top edge, as the die cut leaves it. */}
+        <path d="M0 150 L168 128 L168 216 L0 216 Z" fill="url(#dp-wave)" />
+        <path d="M0 150 L168 128" stroke="#ffffff" strokeOpacity={0.35} strokeWidth={1.2} />
+      </g>
+
+      <g transform="translate(18 20)">
+        <MiniLogo size={20} />
+      </g>
+      <line x1={18} y1={54} x2={110} y2={54} stroke={TEAL} strokeWidth={1.4} opacity={0.7} />
+      <text x={18} y={76} fontSize={10} fontWeight={700} fill={NAVY}>
+        Your Practice,
+      </text>
+      <text x={18} y={89} fontSize={10} fontWeight={700} fill={TEAL}>
+        Beautifully Presented.
+      </text>
+      <Lines x={18} y={100} widths={[104, 88, 96]} gap={5} height={2.4} />
+
+      {/* Business-card slit on the pocket face. */}
+      <rect
+        x={104}
+        y={168}
+        width={44}
+        height={26}
+        rx={2}
+        fill="none"
+        stroke="#ffffff"
+        strokeOpacity={0.5}
+        strokeWidth={1}
+        strokeDasharray="3 2"
+      />
+      <g transform="translate(18 176)">
+        <MiniLogo size={13} light />
+      </g>
+    </g>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Patient education leaflet — 132 × 170                               */
+/* ------------------------------------------------------------------ */
+
+/** Half-letter patient leaflet: artwork panel, heading and body copy. */
+export function PatientLeafletFace() {
+  return (
+    <g>
+      <Sheet w={132} h={170} rx={3} />
+      <g clipPath="url(#dp-clip-leaflet)">
+        <rect width={132} height={26} fill="url(#dp-teal)" />
+        <g transform="translate(0 30)">
+          <ArtPanel w={132} h={52} />
+        </g>
+        <Swoosh w={132} h={170} top={152} fill="url(#dp-wave-soft)" opacity={0.5} />
+      </g>
+
+      <text x={12} y={17} fontSize={8} fontWeight={700} fill="#ffffff">
+        Patient Care Guide
+      </text>
+      <text x={12} y={98} fontSize={9} fontWeight={700} fill={NAVY}>
+        Caring for Your
+      </text>
+      <text x={12} y={109} fontSize={9} fontWeight={700} fill={TEAL}>
+        Smile at Home.
+      </text>
+      <Lines x={12} y={118} widths={[104, 92, 100]} gap={4} height={2.2} />
+      <TickList
+        x={12}
+        y={140}
+        gap={8}
+        size={4.8}
+        items={["Brushing & flossing", "After your treatment"]}
+      />
+      <g transform="translate(96 152)">
+        <MiniLogo size={11} />
+      </g>
+    </g>
+  );
+}

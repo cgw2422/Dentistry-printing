@@ -132,10 +132,15 @@ test.describe("navigation", () => {
   });
 
   test("routes that are not built yet render the branded placeholder", async ({ page }) => {
-    await page.goto("/printing-products");
+    await page.goto("/direct-mail");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("hasn't been built yet");
     await expect(page.locator("header")).toBeVisible();
     await expect(page.locator("footer")).toBeVisible();
+  });
+
+  test("Printing Products is a real page, not the placeholder", async ({ page }) => {
+    await page.goto("/printing-products");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("High-Quality Printing");
   });
 });
 

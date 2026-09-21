@@ -1,12 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { CartIcon, CloseIcon, MenuIcon, Search, UserIcon } from "@/components/ui/icons";
 import { primaryNav } from "@/content/site";
+
+/** "/" matches only itself; other entries also match their sub-routes. */
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 /**
  * Cart indicator. The cart itself is not implemented in this phase — the link
@@ -32,6 +39,7 @@ function CartLink({ className = "" }: { className?: string }) {
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
   const panelRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
@@ -68,21 +76,24 @@ export function Header() {
           {/* ---- Desktop navigation ---- */}
           <nav aria-label="Main" className="hidden flex-1 items-center xl:flex">
             <ul className="flex flex-wrap items-center gap-x-6 gap-y-1">
-              {primaryNav.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={item.href === "/" ? "page" : undefined}
-                    className={`inline-block py-1.5 text-sm font-medium transition-colors hover:text-teal ${
-                      item.href === "/"
-                        ? "text-navy underline decoration-teal decoration-2 underline-offset-[8px]"
-                        : "text-muted"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {primaryNav.map((item) => {
+                const active = isActive(pathname, item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`inline-block py-1.5 text-sm font-medium transition-colors hover:text-teal ${
+                        active
+                          ? "text-navy underline decoration-teal decoration-2 underline-offset-[8px]"
+                          : "text-muted"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 
@@ -147,17 +158,23 @@ export function Header() {
             <Container>
               <nav aria-label="Mobile" className="py-4">
                 <ul className="flex flex-col">
-                  {primaryNav.map((item) => (
-                    <li key={item.href} className="border-b border-line/70 last:border-b-0">
-                      <Link
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className="block py-3.5 text-base font-semibold text-navy"
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  ))}
+                  {primaryNav.map((item) => {
+                    const active = isActive(pathname, item.href);
+                    return (
+                      <li key={item.href} className="border-b border-line/70 last:border-b-0">
+                        <Link
+                          href={item.href}
+                          onClick={() => setOpen(false)}
+                          aria-current={active ? "page" : undefined}
+                          className={`block py-3.5 text-base font-semibold ${
+                            active ? "text-teal" : "text-navy"
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
 
                 <div className="mt-5 flex flex-col gap-3 pb-6">

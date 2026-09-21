@@ -24,7 +24,7 @@ export const brand = {
 /** Primary navigation. Mirrors the long-term public site structure. */
 export const primaryNav: NavLink[] = [
   { label: "Home", href: "/", built: true },
-  { label: "Printing Products", href: "/printing-products" },
+  { label: "Printing Products", href: "/printing-products", built: true },
   { label: "Direct Mail", href: "/direct-mail" },
   { label: "New Practice Packages", href: "/new-practice-packages" },
   { label: "Custom Design", href: "/custom-design" },
@@ -50,7 +50,7 @@ export const footerNav: { heading: string; links: NavLink[] }[] = [
     heading: "Marketing & Design",
     links: [
       { label: "Direct Mail Campaigns", href: "/direct-mail" },
-      { label: "New-Patient Postcards", href: "/printing-products/new-patient-postcards" },
+      { label: "New-Patient Postcards", href: "/printing-products/direct-mail-postcards" },
       { label: "New Practice Packages", href: "/new-practice-packages" },
       { label: "Custom Graphic Design", href: "/custom-design" },
       { label: "Request a Quote", href: "/request-a-quote" },

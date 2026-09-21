@@ -1,7 +1,7 @@
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { TextLink } from "@/components/ui/Button";
-import { popularProducts } from "@/content/products";
+import { homePopular } from "@/content/products";
 import { ProductCard } from "./ProductCard";
 
 export function PopularProducts() {
@@ -17,7 +17,7 @@ export function PopularProducts() {
         </SectionHeading>
 
         <ul className="mt-7 grid grid-cols-2 gap-3 sm:mt-9 sm:gap-5 lg:grid-cols-4 lg:gap-6">
-          {popularProducts.map((product) => (
+          {homePopular.map((product) => (
             <li key={product.slug} className="flex">
               <ProductCard product={product} emphasis="popular" />
             </li>

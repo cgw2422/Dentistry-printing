@@ -87,6 +87,12 @@ export function MockupDefs() {
         <clipPath id="dp-clip-envelope">
           <rect width="190" height="88" rx="3" />
         </clipPath>
+        <clipPath id="dp-clip-folder">
+          <rect width="168" height="216" rx="4" />
+        </clipPath>
+        <clipPath id="dp-clip-leaflet">
+          <rect width="132" height="170" rx="3" />
+        </clipPath>
         <clipPath id="dp-clip-hanger" clipRule="evenodd">
           <path
             clipRule="evenodd"

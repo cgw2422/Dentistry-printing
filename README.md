@@ -47,11 +47,12 @@ src/
   app/
     layout.tsx          Header + footer shell, fonts, metadata
     page.tsx            Homepage — composes the sections below
+    printing-products/  Product catalogue: hero, search, sidebar, grid, CTA
     not-found.tsx       Branded "coming in a later phase" page
     globals.css         Brand tokens (@theme) and base styles
   content/              ← the seam for the future database
     site.ts             Brand details, primary nav, footer nav
-    products.ts         Product categories and featured products
+    products.ts         The product catalogue, categories and search
     faqs.ts             Homepage FAQ copy
     photos.ts           Photography slots on the postcard mockups
   components/
@@ -60,10 +61,22 @@ src/
     layout/             Header (with mobile menu), Footer
     mockups/            Printed-product artwork, drawn as SVG
     home/               One component per homepage section
+    products/           Catalogue view, search field and URL helpers
 public/photos/          Where licensed patient photography goes (see photos.ts)
 docs/screenshots/       Screenshots of the built homepage
-tests/homepage.spec.ts  Content, navigation, FAQ and layout checks
+tests/                  Homepage and Printing Products checks
 ```
+
+### Why filters live in the URL
+
+Search and category on `/printing-products` are held in the query string
+(`?q=…&category=…`), not in React state. Category options are therefore plain
+links: keyboard-navigable and shareable for free, with "Shop All Products"
+clearing everything simply by pointing at the bare route. The unfiltered
+catalogue is server-rendered as the Suspense fallback, so every product is in
+the HTML for search engines and for anything that does not run JavaScript; the
+client swaps in the filtered view once it has read the URL. A deep link to a
+filtered view therefore shows the full catalogue for a frame before narrowing.
 
 ### Why `src/content` matters
 
@@ -92,6 +105,10 @@ flat-lay and the product tiles. Shared gradients and clip paths live in
 ### Working
 
 - Homepage, fully responsive, verified at 360px, 390px, 768px, 1280px and 1440px
+- Printing Products (`/printing-products`): all 12 products, working search
+  (case-insensitive, whitespace-tolerant, Enter or button), category filtering
+  from the desktop sidebar and the mobile chip rail, the two combined, an empty
+  state and Clear Search
 - Header: desktop navigation, and a mobile menu that opens, locks page scroll,
   closes on Escape or on navigating
 - FAQ accordion: keyboard operable, items toggle independently
@@ -101,10 +118,11 @@ flat-lay and the product tiles. Shared gradients and clip paths live in
 
 ### Not built yet
 
-Product listing and detail pages, Direct Mail, New Practice Packages, Custom
-Design, How It Works, About, Contact, Request a Quote, search, customer accounts,
-the shopping cart and checkout, Privacy Policy, Terms of Service, and the admin
-dashboard. **The cart badge is a static zero — there is no cart.**
+Individual product pages, Direct Mail, New Practice Packages, Custom Design,
+How It Works, About, Contact, Request a Quote, site-wide search, customer
+accounts, the shopping cart and checkout, Privacy Policy, Terms of Service, and
+the admin dashboard. **The cart badge is a static zero — there is no cart**, and
+no product can be configured, priced or ordered yet.
 
 ## Planned phases
 
@@ -113,14 +131,15 @@ an approved plan.** Pages are specified and approved one at a time: do not build
 a page from this list without its own design and requirements from the owner.
 
 1. **Homepage + design system** — approved
-2. Public pages, one at a time: products, product detail, direct mail, packages,
+2. **Printing Products catalogue** — built, awaiting review
+3. Remaining public pages, one at a time: product detail, direct mail, packages,
    design, about, contact, quote request, legal pages
-3. Database (Postgres + Prisma) and the admin dashboard: products, retail pricing,
+4. Database (Postgres + Prisma) and the admin dashboard: products, retail pricing,
    wholesale costs, quotes, orders, payments, artwork, proofs, campaigns,
    fulfillment, revenue and gross profit
-4. Customer accounts: practices with multiple staff members and multiple
+5. Customer accounts: practices with multiple staff members and multiple
    locations, artwork library, proof approval, order history and reordering
-5. Cart, checkout and payments
+6. Cart, checkout and payments
 
 Supplier orders are submitted manually; no supplier API is assumed. Supplier
 identity, wholesale costs and margins never appear in customer-facing code.

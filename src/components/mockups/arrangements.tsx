@@ -1,6 +1,8 @@
 import type { MockupKey } from "@/content/products";
 import {
   AppointmentCardFace,
+  PatientLeafletFace,
+  PresentationFolderFace,
   BrochurePanelFront,
   BrochurePanelInner,
   BusinessCardFace,
@@ -132,6 +134,53 @@ export function HeroArrangement({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Hero group for the Printing Products catalogue: the same pieces as the
+ * homepage hero in a wider, flatter composition, so the page reads as a
+ * continuation rather than a repeat.
+ */
+export function CatalogHeroArrangement({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 620 340"
+      className={className}
+      role="img"
+      aria-label="Printed dental practice materials: a new-patient postcard, a standing rack card, a tri-fold brochure, a stack of business cards and an appointment reminder card."
+    >
+      <Ground cx={310} cy={318} rx={286} ry={22} opacity={0.12} />
+
+      <Ground cx={470} cy={168} rx={110} ry={13} />
+      <Piece transform="translate(376 6) scale(0.92)">
+        <BrochureStanding />
+      </Piece>
+
+      <Ground cx={570} cy={288} rx={44} ry={10} />
+      <Piece transform="translate(542 156) scale(0.72) rotate(5)">
+        <RackCardFace />
+      </Piece>
+
+      <Ground cx={188} cy={196} rx={170} ry={15} />
+      <Piece transform="translate(18 8) scale(1.7) rotate(-2.5)">
+        <PostcardSmile />
+      </Piece>
+
+      <Ground cx={104} cy={310} rx={96} ry={12} />
+      <Piece transform="translate(10 196) scale(0.98) rotate(-4)">
+        <CardStack layers={7}>
+          <BusinessCardFace />
+        </CardStack>
+      </Piece>
+
+      <Ground cx={310} cy={322} rx={98} ry={12} />
+      <Piece transform="translate(212 214) scale(1) rotate(3)">
+        <CardStack layers={5}>
+          <AppointmentCardFace />
+        </CardStack>
+      </Piece>
+    </svg>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* Direct-mail arrangement                                             */
 /* ------------------------------------------------------------------ */
@@ -234,6 +283,12 @@ const tileLabels: Record<MockupKey, string> = {
   brochures: "A tri-fold dental patient brochure standing open.",
   referralCards: "A printed stack of patient referral cards.",
   practiceEssentials: "Practice letterhead, envelope and rack card.",
+  rackCards: "Two dental practice rack cards standing side by side.",
+  doorHangers: "Dental practice door hangers with a die-cut hanging hole.",
+  letterheadEnvelopes: "Dental practice letterhead with a matching printed envelope.",
+  presentationFolders: "A branded pocket folder for new-patient paperwork.",
+  patientEducation: "Printed patient education leaflets about treatment and aftercare.",
+  customPrinting: "An assortment of printed dental practice pieces.",
   newPatientPostcards: "A new-patient dental postcard.",
   triFoldBrochures: "A tri-fold dental patient brochure standing open.",
 };
@@ -299,6 +354,80 @@ function TileArt({ mockup }: { mockup: MockupKey }) {
           </Piece>
           <Piece transform="translate(56 86) scale(0.7) rotate(-2)">
             <EnvelopeFace />
+          </Piece>
+        </>
+      );
+    case "rackCards":
+      return (
+        <>
+          <Piece transform="translate(132 18) scale(0.66) rotate(8)" soft>
+            <RackCardFace />
+          </Piece>
+          <Piece transform="translate(66 10) scale(0.76) rotate(-4)">
+            <RackCardFace />
+          </Piece>
+        </>
+      );
+    case "doorHangers":
+      return (
+        <>
+          <Piece transform="translate(130 14) scale(0.58) rotate(8)" soft>
+            <DoorHangerFace />
+          </Piece>
+          <Piece transform="translate(64 8) scale(0.68) rotate(-4)">
+            <DoorHangerFace />
+          </Piece>
+        </>
+      );
+    case "letterheadEnvelopes":
+      return (
+        <>
+          <Piece transform="translate(26 6) scale(0.7) rotate(-4)" soft>
+            <LetterheadFace />
+          </Piece>
+          <Piece transform="translate(106 50) scale(0.6) rotate(-6)" soft>
+            <EnvelopeFace />
+          </Piece>
+          <Piece transform="translate(92 88) scale(0.72) rotate(4)">
+            <EnvelopeFace />
+          </Piece>
+        </>
+      );
+    case "presentationFolders":
+      return (
+        <>
+          <Piece transform="translate(118 18) scale(0.5) rotate(8)" soft>
+            <PresentationFolderFace />
+          </Piece>
+          <Piece transform="translate(52 10) scale(0.58) rotate(-4)">
+            <PresentationFolderFace />
+          </Piece>
+        </>
+      );
+    case "patientEducation":
+      return (
+        <>
+          <Piece transform="translate(124 20) scale(0.62) rotate(8)" soft>
+            <PatientLeafletFace />
+          </Piece>
+          <Piece transform="translate(56 12) scale(0.7) rotate(-5)">
+            <PatientLeafletFace />
+          </Piece>
+        </>
+      );
+    case "customPrinting":
+      return (
+        <>
+          <Piece transform="translate(182 12) scale(0.46) rotate(8)" soft>
+            <RackCardFace />
+          </Piece>
+          <Piece transform="translate(30 8) scale(0.8) rotate(-4)">
+            <PostcardSmile />
+          </Piece>
+          <Piece transform="translate(34 80) scale(0.56) rotate(3)">
+            <CardStack layers={5}>
+              <BusinessCardFace />
+            </CardStack>
           </Piece>
         </>
       );
