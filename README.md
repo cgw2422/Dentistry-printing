@@ -70,6 +70,7 @@ src/
     layout.tsx          Header + footer shell, fonts, metadata
     page.tsx            Homepage — composes the sections below
     printing-products/  Product catalogue: hero, search, sidebar, grid, CTA
+      [slug]/           One product-detail page per catalogue product
     not-found.tsx       Branded "coming in a later phase" page
     globals.css         Brand tokens (@theme) and base styles
   content/              ← the seam for the future database
@@ -77,6 +78,7 @@ src/
     products.ts         The product catalogue, categories and search
     faqs.ts             Homepage FAQ copy
     photos.ts           Photography slots on the postcard mockups
+    productDetails.ts   Per-product page content and option groups
   components/
     brand/              mark.ts (the tooth paths), ToothMark, Logo lockup
     ui/                 Container, Button, SectionHeading, icons
@@ -85,6 +87,8 @@ src/
     home/               One component per homepage section
     products/           Catalogue view, search field, mobile filter dialog
                         and URL helpers
+      detail/           The product-detail template: gallery, configurator,
+                        artwork and custom-design blocks
 public/photos/          Where licensed patient photography goes (see photos.ts)
 scripts/build-preview.mjs  Static export for the preview, without touching the
                         deployed config
@@ -109,6 +113,24 @@ The static export used for the shareable preview has no request to read, so
 there the page is prerendered unfiltered and the client applies the URL — the
 one place the old flash remains. `useCatalogFilters` reads the URL first and
 the server's values second, which keeps one component correct in both.
+
+### One product-detail template
+
+`/printing-products/[slug]` renders every product through a single template.
+What differs between products is data in `src/content/productDetails.ts`, never
+layout: gallery views, option groups and detail copy are declared per product,
+and a section with no data simply is not rendered. Only Business Cards is
+authored so far; the other eleven fall back to their catalogue entry and get
+their name, artwork and a quote action without inventing anything.
+
+**No specifications or prices are authored anywhere.** An option group declares
+that a product is ordered by, say, paper type, and carries `status: "pending"`
+until the supplier confirms the values. A pending group renders as a real but
+disabled control showing only its placeholder, beside a notice that
+specifications are being finalised — never as a list of choices that look
+orderable. Supplier costs and retail prices must never be written into that
+module: it is imported by client components, so any value in it ships to the
+browser. Commercial figures belong in the database, read in a server component.
 
 ### Why `src/content` matters
 
@@ -137,6 +159,9 @@ flat-lay and the product tiles. Shared gradients and clip paths live in
 ### Working
 
 - Homepage, fully responsive, verified at 360px, 390px, 768px, 1280px and 1440px
+- Product pages for all 12 products at `/printing-products/<slug>`, with
+  breadcrumbs and a keyboard-operable gallery. Business Cards is the fully
+  authored example
 - Printing Products (`/printing-products`): all 12 products, working search
   (case-insensitive, whitespace-tolerant, Enter or button), category filtering
   from the desktop sidebar and a mobile Filter Products dialog, the two
@@ -151,11 +176,11 @@ flat-lay and the product tiles. Shared gradients and clip paths live in
 
 ### Not built yet
 
-Individual product pages, Direct Mail, New Practice Packages, Custom Design,
+Direct Mail, New Practice Packages, Custom Design,
 How It Works, About, Contact, Request a Quote, site-wide search, customer
 accounts, the shopping cart and checkout, Privacy Policy, Terms of Service, and
-the admin dashboard. **The cart badge is a static zero — there is no cart**, and
-no product can be configured, priced or ordered yet.
+the admin dashboard. **The cart badge is a static zero — there is no cart**, no
+product can be configured, priced or ordered, and there is no artwork upload.
 
 ## Planned phases
 
@@ -164,15 +189,16 @@ an approved plan.** Pages are specified and approved one at a time: do not build
 a page from this list without its own design and requirements from the owner.
 
 1. **Homepage + design system** — approved
-2. **Printing Products catalogue** — built, awaiting review
-3. Remaining public pages, one at a time: product detail, direct mail, packages,
-   design, about, contact, quote request, legal pages
-4. Database (Postgres + Prisma) and the admin dashboard: products, retail pricing,
+2. **Printing Products catalogue** — approved
+3. **Product detail pages** — built, awaiting review
+4. Remaining public pages, one at a time: direct mail, packages, design, about,
+   contact, quote request, legal pages
+5. Database (Postgres + Prisma) and the admin dashboard: products, retail pricing,
    wholesale costs, quotes, orders, payments, artwork, proofs, campaigns,
    fulfillment, revenue and gross profit
-5. Customer accounts: practices with multiple staff members and multiple
+6. Customer accounts: practices with multiple staff members and multiple
    locations, artwork library, proof approval, order history and reordering
-6. Cart, checkout and payments
+7. Cart, checkout and payments
 
 Supplier orders are submitted manually; no supplier API is assumed. Supplier
 identity, wholesale costs and margins never appear in customer-facing code.

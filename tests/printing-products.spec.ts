@@ -85,9 +85,14 @@ test.describe("Printing Products page", () => {
     );
   });
 
-  test("an unbuilt product page still lands on the branded placeholder", async ({ page }) => {
+  test("product pages are real pages now, and unknown slugs 404", async ({ page }) => {
     await page.goto("/printing-products/business-cards");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("hasn't been built yet");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "Professional Business Cards",
+    );
+
+    const response = await page.goto("/printing-products/nope");
+    expect(response?.status()).toBe(404);
   });
 
   test("makes no claim about price, turnaround or results", async ({ page }) => {

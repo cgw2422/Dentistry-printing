@@ -831,3 +831,49 @@ export function PatientLeafletFace() {
     </g>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Business card, reverse — 180 × 103                                  */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The back of a practice business card: name and role, then contact lines.
+ *
+ * The name and role are shown as placeholder wording and the contact details
+ * as abstract rules — this is a mockup of the layout, not a claim about any
+ * real person or number.
+ */
+export function BusinessCardBack() {
+  return (
+    <g>
+      <Sheet w={180} h={103} />
+      <g clipPath="url(#dp-clip-card)">
+        <rect width={180} height={8} fill="url(#dp-teal)" />
+        <Swoosh w={180} h={103} top={92} fill="url(#dp-wave-soft)" opacity={0.45} />
+        <g transform="translate(132 30)" opacity={0.1}>
+          <MarkGlyph size={62} outline={TEAL} accent={TEAL} />
+        </g>
+      </g>
+
+      <text x={16} y={32} fontSize={10} fontWeight={700} fill={NAVY}>
+        Your Name Here
+      </text>
+      <text x={16} y={43} fontSize={6} fontWeight={600} fill={TEAL}>
+        Position / Title
+      </text>
+      <line
+        x1={16}
+        y1={51}
+        x2={62}
+        y2={51}
+        stroke={TEAL}
+        strokeWidth={1.2}
+        opacity={0.6}
+      />
+      <Lines x={16} y={59} widths={[78, 66, 88]} gap={5} height={2.2} />
+      <g transform="translate(16 84)">
+        <MiniLogo size={12} />
+      </g>
+    </g>
+  );
+}
