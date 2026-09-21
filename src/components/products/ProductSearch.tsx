@@ -1,21 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ALL_PRODUCTS } from "@/content/products";
+import { useRouter } from "next/navigation";
 import { Search } from "@/components/ui/icons";
 import { catalogHref } from "./catalogUrl";
 import { SEARCH_BUTTON_CLASS, SEARCH_FORM_CLASS, SEARCH_INPUT_CLASS } from "./searchStyles";
+import { useCatalogFilters } from "./useCatalogFilters";
 
 /**
  * Catalogue search box. Submitting (button or Enter) writes the query to the
  * URL, which is what the catalogue below reads — so this component and the
  * grid stay in sync without being part of the same tree.
  */
-export function ProductSearch() {
-  const params = useSearchParams();
-  const query = params.get("q") ?? "";
-  const category = params.get("category") ?? ALL_PRODUCTS;
+export function ProductSearch({
+  query: serverQuery,
+  category: serverCategory,
+}: {
+  query?: string;
+  category?: string;
+}) {
+  const { query, category } = useCatalogFilters(serverQuery, serverCategory);
 
   // Keying on the committed query remounts the field whenever the URL changes
   // from elsewhere — a category link, "Shop All Products", or the back button —

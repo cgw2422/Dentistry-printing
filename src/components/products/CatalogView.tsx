@@ -6,6 +6,7 @@ import { CloseIcon } from "@/components/ui/icons";
 import { ALL_PRODUCTS, filterProducts, productCategories, products } from "@/content/products";
 import { CATALOG_ANCHOR, catalogHref } from "./catalogUrl";
 import { CustomPrintingCard } from "./CustomPrintingCard";
+import { MobileCategoryFilter } from "./MobileCategoryFilter";
 
 /**
  * The catalogue: category sidebar (desktop), category chips (mobile) and the
@@ -94,29 +95,10 @@ export function CatalogView({
               </p>
             </div>
 
-            {/* Mobile category filter: a compact, scrollable chip rail. */}
-            <nav aria-label="Product categories" className="mt-5 lg:hidden">
-              <ul className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {productCategories.map((option) => {
-                  const selected = option.id === category;
-                  return (
-                    <li key={option.id} className="shrink-0">
-                      <Link
-                        href={catalogHref({ query, category: option.id })}
-                        aria-current={selected ? "true" : undefined}
-                        className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold transition-colors ${
-                          selected
-                            ? "bg-navy text-white"
-                            : "bg-mist text-navy ring-1 ring-inset ring-line hover:bg-sky-50"
-                        }`}
-                      >
-                        {option.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </nav>
+            {/* Compact filter for phones and tablets; the sidebar covers lg. */}
+            <div className="mt-5">
+              <MobileCategoryFilter query={query} category={category} />
+            </div>
 
             {/* Active filters, with a way back out of them. */}
             {filtered && (

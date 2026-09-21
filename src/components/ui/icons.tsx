@@ -131,6 +131,14 @@ export const MailIcon = ({ className }: IconProps) => (
   </svg>
 );
 
+export const FilterIcon = ({ className }: IconProps) => (
+  <svg {...S} className={className}>
+    <path d="M4 7h16" />
+    <path d="M7 12h10" />
+    <path d="M10 17h4" />
+  </svg>
+);
+
 export const CheckIcon = ({ className }: IconProps) => (
   <svg {...S} strokeWidth={2.4} className={className}>
     <path d="m5 12.5 4.5 4.5L19 7" />

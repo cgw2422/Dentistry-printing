@@ -83,7 +83,8 @@ src/
     layout/             Header (with mobile menu), Footer
     mockups/            Printed-product artwork, drawn as SVG
     home/               One component per homepage section
-    products/           Catalogue view, search field and URL helpers
+    products/           Catalogue view, search field, mobile filter dialog
+                        and URL helpers
 public/photos/          Where licensed patient photography goes (see photos.ts)
 scripts/build-preview.mjs  Static export for the preview, without touching the
                         deployed config
@@ -96,11 +97,18 @@ tests/                  Homepage and Printing Products checks
 Search and category on `/printing-products` are held in the query string
 (`?q=…&category=…`), not in React state. Category options are therefore plain
 links: keyboard-navigable and shareable for free, with "Shop All Products"
-clearing everything simply by pointing at the bare route. The unfiltered
-catalogue is server-rendered as the Suspense fallback, so every product is in
-the HTML for search engines and for anything that does not run JavaScript; the
-client swaps in the filtered view once it has read the URL. A deep link to a
-filtered view therefore shows the full catalogue for a frame before narrowing.
+clearing everything simply by pointing at the bare route.
+
+The page reads those parameters on the **server**, per request — awaiting
+`searchParams` in `page.tsx` is what opts the route into that. So the HTML that
+arrives is already filtered, with the right product count and the right empty
+state, before any JavaScript runs. Crawlers and no-JS visitors see the same
+thing, and a filtered link never flashes the full catalogue.
+
+The static export used for the shareable preview has no request to read, so
+there the page is prerendered unfiltered and the client applies the URL — the
+one place the old flash remains. `useCatalogFilters` reads the URL first and
+the server's values second, which keeps one component correct in both.
 
 ### Why `src/content` matters
 
@@ -131,8 +139,9 @@ flat-lay and the product tiles. Shared gradients and clip paths live in
 - Homepage, fully responsive, verified at 360px, 390px, 768px, 1280px and 1440px
 - Printing Products (`/printing-products`): all 12 products, working search
   (case-insensitive, whitespace-tolerant, Enter or button), category filtering
-  from the desktop sidebar and the mobile chip rail, the two combined, an empty
-  state and Clear Search
+  from the desktop sidebar and a mobile Filter Products dialog, the two
+  combined, an empty state and Clear Search — all resolved server-side, so a
+  filtered URL arrives filtered
 - Header: desktop navigation, and a mobile menu that opens, locks page scroll,
   closes on Escape or on navigating
 - FAQ accordion: keyboard operable, items toggle independently

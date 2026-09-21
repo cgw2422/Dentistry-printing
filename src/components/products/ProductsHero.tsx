@@ -5,13 +5,15 @@ import { PencilIcon, PrinterIcon, TruckIcon } from "@/components/ui/icons";
 import { ProductSearch } from "./ProductSearch";
 import { ProductSearchFallback } from "./ProductSearchFallback";
 
+const STATIC_EXPORT = process.env.STATIC_EXPORT === "1";
+
 const highlights = [
   { icon: TruckIcon, title: "Nationwide", detail: "Fulfillment" },
   { icon: PencilIcon, title: "Custom Design", detail: "Services" },
   { icon: PrinterIcon, title: "Professional", detail: "Printing" },
 ];
 
-export function ProductsHero() {
+export function ProductsHero({ query, category }: { query?: string; category?: string }) {
   return (
     <section className="relative overflow-hidden bg-linear-to-b from-sky-50 via-sky-50 to-white">
       <div
@@ -40,11 +42,15 @@ export function ProductsHero() {
             </p>
 
             <div className="mt-6 sm:mt-7">
-              {/* useSearchParams needs a boundary so the rest of the hero can
-                  still be prerendered. */}
-              <Suspense fallback={<ProductSearchFallback />}>
-                <ProductSearch />
-              </Suspense>
+              {/* As on the page itself: the boundary is only for the static
+                  export, where the page is prerendered without a request. */}
+              {STATIC_EXPORT ? (
+                <Suspense fallback={<ProductSearchFallback query={query} />}>
+                  <ProductSearch query={query} category={category} />
+                </Suspense>
+              ) : (
+                <ProductSearch query={query} category={category} />
+              )}
             </div>
 
             <ul className="mt-8 grid grid-cols-3 gap-x-3 gap-y-5 sm:gap-x-6 lg:mt-9">

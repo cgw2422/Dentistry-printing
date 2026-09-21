@@ -173,6 +173,13 @@ test.describe("search", () => {
 });
 
 test.describe("category filtering", () => {
+  test("the sidebar is desktop-only and the dialog is not", async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== "desktop", "desktop layout only");
+    await page.goto(CATALOG);
+    await expect(page.getByRole("navigation", { name: "Product categories" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Filter Products/ })).toBeHidden();
+  });
+
   test("the sidebar filters the grid and marks the active category", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "sidebar is desktop only");
     await page.goto(CATALOG);
@@ -199,17 +206,92 @@ test.describe("category filtering", () => {
     await expect(cards(page)).toHaveCount(12);
   });
 
-  test("the mobile chip filter works and returns to All Products", async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === "desktop", "chip rail is the compact layout");
-    await page.goto(CATALOG);
+  test.describe("the mobile Filter Products control", () => {
+    test.beforeEach(({}, testInfo) => {
+      test.skip(testInfo.project.name === "desktop", "compact layout only");
+    });
 
-    const chips = page.getByRole("navigation", { name: "Product categories" });
-    await chips.getByRole("link", { name: "Door Hangers", exact: true }).click();
-    await page.waitForURL(/category=door-hangers/);
-    await expectProducts(page, ["Door Hangers"]);
+    const trigger = (page: Page) => page.getByRole("button", { name: /Filter Products/ });
+    const dialog = (page: Page) => page.getByRole("dialog", { name: "Filter Products" });
 
-    await chips.getByRole("link", { name: "All Products", exact: true }).click();
-    await expect(cards(page)).toHaveCount(12);
+    test("replaces the sidebar and shows the current selection", async ({ page }) => {
+      await page.goto(CATALOG);
+      await expect(trigger(page)).toBeVisible();
+      await expect(page.getByRole("navigation", { name: "Product categories" })).toBeHidden();
+      await expect(trigger(page)).toContainText("All Products");
+
+      await page.goto(`${CATALOG}?category=rack-cards`);
+      await expect(trigger(page)).toContainText("Rack Cards");
+    });
+
+    test("opens a dialog listing every category, marking the current one", async ({ page }) => {
+      await page.goto(`${CATALOG}?category=door-hangers`);
+      await trigger(page).click();
+
+      await expect(dialog(page)).toBeVisible();
+      // The category list itself; the footer's Clear filter link is separate.
+      await expect(dialog(page).getByRole("list").getByRole("link")).toHaveCount(13);
+      await expect(dialog(page).getByRole("link", { name: "Clear filter" })).toBeVisible();
+      await expect(
+        dialog(page).getByRole("link", { name: "Door Hangers", exact: true }),
+      ).toHaveAttribute("aria-current", "true");
+      await expect(page.locator("body")).toHaveCSS("overflow", "hidden");
+    });
+
+    test("choosing a category filters the grid and closes the dialog", async ({ page }) => {
+      await page.goto(CATALOG);
+      await trigger(page).click();
+      await dialog(page).getByRole("link", { name: "Presentation Folders", exact: true }).click();
+
+      await page.waitForURL(/category=presentation-folders/);
+      await expectProducts(page, ["Presentation Folders"]);
+      await expect(dialog(page)).toHaveCount(0);
+      await expect(trigger(page)).toContainText("Presentation Folders");
+    });
+
+    test("Clear filter restores every product but keeps the search", async ({ page }) => {
+      await page.goto(`${CATALOG}?q=cards&category=referral-cards`);
+      await expectProducts(page, ["Referral Cards"]);
+
+      await trigger(page).click();
+      await dialog(page).getByRole("link", { name: "Clear filter" }).click();
+
+      await page.waitForURL((url) => !url.searchParams.has("category"));
+      expect(new URL(page.url()).searchParams.get("q")).toBe("cards");
+      expect((await shownNames(page)).length).toBeGreaterThan(1);
+    });
+
+    test("selecting a category keeps an active search", async ({ page }) => {
+      await page.goto(`${CATALOG}?q=cards`);
+      await trigger(page).click();
+      await dialog(page).getByRole("link", { name: "Referral Cards", exact: true }).click();
+
+      await page.waitForURL(/category=referral-cards/);
+      expect(new URL(page.url()).searchParams.get("q")).toBe("cards");
+      await expectProducts(page, ["Referral Cards"]);
+    });
+
+    test("Escape closes it and returns focus to the trigger", async ({ page }) => {
+      await page.goto(CATALOG);
+      await trigger(page).click();
+      await expect(dialog(page)).toBeVisible();
+
+      await page.keyboard.press("Escape");
+      await expect(dialog(page)).toHaveCount(0);
+      await expect(trigger(page)).toBeFocused();
+      await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+    });
+
+    test("Done and the close button both dismiss it", async ({ page }) => {
+      await page.goto(CATALOG);
+      await trigger(page).click();
+      await dialog(page).getByRole("button", { name: "Done" }).click();
+      await expect(dialog(page)).toHaveCount(0);
+
+      await trigger(page).click();
+      await dialog(page).getByRole("button", { name: "Close filter" }).click();
+      await expect(dialog(page)).toHaveCount(0);
+    });
   });
 
   test("search and category narrow together rather than cancelling out", async ({ page }) => {
@@ -335,5 +417,68 @@ test.describe("Printing Products layout", () => {
     await expect(
       page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Printing Products" }),
     ).toHaveAttribute("aria-current", "page");
+  });
+});
+
+test.describe("server-rendered filtering", () => {
+  /**
+   * The catalogue used to be prerendered unfiltered and narrowed by the
+   * client, so a filtered link showed all 12 products for a moment. These
+   * assert the fix at the source: the HTML the server sends is already
+   * correct, before any JavaScript runs.
+   */
+  const countCards = (html: string) => (html.match(/<li class="flex">/g) ?? []).length;
+  // React splits interpolated text with <!-- --> markers, so strip comments
+  // and tags rather than reading up to the first "<".
+  const countText = (html: string) =>
+    html
+      .match(/aria-live="polite">([\s\S]*?)<\/p>/)?.[1]
+      ?.replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/\s+/g, " ")
+      .trim() ?? "";
+
+  test("the HTML for a filtered URL contains only the matching products", async ({ request }) => {
+    const html = await (await request.get(`${CATALOG}?q=envelope`)).text();
+    expect(countCards(html)).toBe(1);
+    expect(countText(html)).toBe("1 product of 12");
+    expect(html).toContain("Letterhead &amp; Envelopes");
+    expect(html).not.toContain("Door Hangers</h3>");
+  });
+
+  test("the HTML for a category URL is filtered too", async ({ request }) => {
+    const html = await (await request.get(`${CATALOG}?category=door-hangers`)).text();
+    expect(countCards(html)).toBe(1);
+    expect(countText(html)).toBe("1 product of 12");
+  });
+
+  test("the HTML for a URL with no matches carries the empty state", async ({ request }) => {
+    const html = await (await request.get(`${CATALOG}?q=xyzzy`)).text();
+    expect(countCards(html)).toBe(0);
+    expect(countText(html)).toBe("0 products of 12");
+    expect(html).toContain("No products found.");
+  });
+
+  test("the unfiltered HTML still carries all 12, once", async ({ request }) => {
+    const html = await (await request.get(CATALOG)).text();
+    expect(countCards(html)).toBe(12);
+    expect(countText(html)).toBe("12 products");
+  });
+
+  test("the search box is pre-filled from the URL in the HTML", async ({ request }) => {
+    const html = await (await request.get(`${CATALOG}?q=referral`)).text();
+    expect(html).toMatch(/id="product-search"[^>]*value="referral"/);
+  });
+
+  test("a filtered URL renders correctly with JavaScript turned off", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto(`${CATALOG}?q=envelope`);
+
+    await expect(page.getByRole("list", { name: "Printing products" }).getByRole("listitem")).toHaveCount(1);
+    await expect(
+      page.getByRole("heading", { name: "Letterhead & Envelopes", exact: true }),
+    ).toBeVisible();
+    await context.close();
   });
 });

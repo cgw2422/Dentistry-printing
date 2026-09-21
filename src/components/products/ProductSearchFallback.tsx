@@ -8,7 +8,7 @@ import { SEARCH_BUTTON_CLASS, SEARCH_FORM_CLASS, SEARCH_INPUT_CLASS } from "./se
  * JavaScript: submitting lands on /printing-products?q=… which the catalogue
  * reads exactly as it would after a client-side search.
  */
-export function ProductSearchFallback() {
+export function ProductSearchFallback({ query = "" }: { query?: string }) {
   return (
     <form role="search" action={CATALOG_PATH} method="get" className={SEARCH_FORM_CLASS}>
       <label htmlFor="product-search" className="sr-only">
@@ -23,6 +23,7 @@ export function ProductSearchFallback() {
           id="product-search"
           name="q"
           type="search"
+          defaultValue={query}
           placeholder="Search products..."
           autoComplete="off"
           className={SEARCH_INPUT_CLASS}
