@@ -3,7 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { CheckIcon, PencilIcon, PrinterIcon, TruckIcon, CheckCircleIcon } from "@/components/ui/icons";
 import type { HighlightKey, ResolvedProduct } from "@/content/productDetails";
 import { CustomDesignBanner } from "./CustomDesignBanner";
-import { ArtworkOptions, ProductConfigurator } from "./ProductConfigurator";
+import { ArtworkOptions, ProductQuotePanel } from "./ProductQuotePanel";
 import { ProductGallery } from "./ProductGallery";
 
 const HIGHLIGHT_ICONS: Record<HighlightKey, typeof PrinterIcon> = {
@@ -75,8 +75,8 @@ export function ProductDetailPage({ resolved }: { resolved: ResolvedProduct }) {
               </ul>
 
               <div className="mt-7">
-                <ProductConfigurator
-                  optionGroups={detail.optionGroups}
+                <ProductQuotePanel
+                  customization={detail.customization}
                   productName={product.name.toLowerCase()}
                   productSlug={product.slug}
                 />

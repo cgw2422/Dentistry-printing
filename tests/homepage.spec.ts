@@ -4,7 +4,6 @@ const NAV_LABELS = [
   "Home",
   "Printing Products",
   "Direct Mail",
-  "New Practice Packages",
   "Custom Design",
   "How It Works",
   "About",
@@ -87,7 +86,7 @@ test.describe("homepage content", () => {
 });
 
 test.describe("navigation", () => {
-  test("desktop header exposes the full nav, account and cart", async ({ page }, testInfo) => {
+  test("desktop header exposes the full nav and one action", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== "desktop", "desktop layout only");
     await page.goto("/");
 
@@ -96,9 +95,12 @@ test.describe("navigation", () => {
       await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
     }
     const header = page.getByRole("banner");
-    await expect(header.getByRole("link", { name: "My Account" })).toBeVisible();
-    await expect(header.getByRole("link", { name: "Shopping cart, 0 items" })).toBeVisible();
     await expect(header.getByRole("link", { name: "Request a Quote", exact: true })).toBeVisible();
+
+    // This site sells by quote. Nothing in the header may suggest otherwise.
+    await expect(header.getByRole("link", { name: /my account/i })).toHaveCount(0);
+    await expect(header.getByRole("link", { name: /cart/i })).toHaveCount(0);
+    await expect(header.getByRole("link", { name: /^search$/i })).toHaveCount(0);
   });
 
   test("mobile menu opens, traps scroll, and closes on Escape", async ({ page }, testInfo) => {
@@ -111,7 +113,7 @@ test.describe("navigation", () => {
     const panel = page.locator("#mobile-menu");
     await expect(panel).toBeVisible();
     await expect(panel.getByRole("navigation", { name: "Mobile" }).getByRole("link")).toHaveCount(
-      NAV_LABELS.length + 2, // nav links + Request a Quote + My Account
+      NAV_LABELS.length + 1, // nav links + Request a Quote
     );
     await expect(page.locator("body")).toHaveCSS("overflow", "hidden");
 
@@ -131,9 +133,30 @@ test.describe("navigation", () => {
     await expect(page.locator("#mobile-menu")).toHaveCount(0);
   });
 
-  test("routes that are not built yet render the branded placeholder", async ({ page }) => {
-    await page.goto("/direct-mail");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("hasn't been built yet");
+  test("every navigation and footer destination is a real page", async ({ page }) => {
+    // A lead-generation site cannot afford a dead link in its own chrome: a
+    // visitor who lands on a placeholder does not come back to the quote form.
+    await page.goto("/");
+    const hrefs = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("header a, footer a"))
+        .map((a) => a.getAttribute("href") ?? "")
+        .filter((href) => href.startsWith("/")),
+    );
+    expect(hrefs.length).toBeGreaterThan(10);
+
+    const broken: string[] = [];
+    for (const href of [...new Set(hrefs)]) {
+      const response = await page.goto(href);
+      if (response && response.status() >= 400) broken.push(`${href} → ${response.status()}`);
+      const heading = await page.getByRole("heading", { level: 1 }).first().innerText();
+      if (/hasn't been built|couldn't find that page/i.test(heading)) broken.push(href);
+    }
+    expect(broken).toEqual([]);
+  });
+
+  test("a genuinely unknown URL still gets the branded 404", async ({ page }) => {
+    await page.goto("/not-a-real-page");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("couldn't find that page");
     await expect(page.locator("header")).toBeVisible();
     await expect(page.locator("footer")).toBeVisible();
   });
@@ -212,10 +235,10 @@ test.describe("responsive layout", () => {
     await page.goto("/");
     // These two buttons wrap the moment the text column gets too narrow, which
     // is the first thing to break when the hero proportions are retuned.
-    const shop = page.getByRole("link", { name: "Shop Printing Products" }).first();
-    const mail = page.getByRole("link", { name: "Start a Direct Mail Campaign" }).first();
-    const a = await shop.boundingBox();
-    const b = await mail.boundingBox();
+    const quote = page.getByRole("link", { name: "Request a Quote", exact: true }).nth(1);
+    const browse = page.getByRole("link", { name: "Browse Printing Products" }).first();
+    const a = await quote.boundingBox();
+    const b = await browse.boundingBox();
     expect(a).not.toBeNull();
     expect(b).not.toBeNull();
     expect(Math.round(a!.y)).toBe(Math.round(b!.y));

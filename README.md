@@ -2,11 +2,15 @@
 
 Nationwide printing and direct mail for dental practices — **Print • Promote • Grow**.
 
-**Built so far: the homepage, the printing-products catalogue, the twelve
-product pages, and the Request a Quote system — including the database, owner
-sign-in and the staff area that quote requests land in.** There is still no
-customer account system, cart, checkout, payment handling or admin dashboard.
-See [Status](#status) for exactly what does and does not work.
+**This is a lead-generation site, not a store.** The whole public site exists to
+get a dental practice to the Request a Quote form; the owner then follows up
+personally. There is deliberately no customer account, no cart, no checkout, no
+payment handling, no order tracking and no online pricing — and no UI anywhere
+that hints at any of them.
+
+Quote requests are stored in PostgreSQL so a lead survives an email failure, and
+`/owner` is a small internal utility for reading them. That is the entire
+backend. See [Status](#status) for exactly what does and does not work.
 
 ## Stack
 
@@ -260,6 +264,13 @@ src/
       printing-products/  Product catalogue: hero, search, sidebar, grid, CTA
         [slug]/         One product-detail page per catalogue product
       request-a-quote/  The quote form, and its confirmation page
+      direct-mail/      Campaign explainer, converting to the quote form
+      custom-design/    Design services explainer
+      how-it-works/     The four-step process
+      about/            What the business does and how it works
+      contact/          Routes to the quote form; shows details once configured
+      privacy-policy/   What happens to quote-form data
+      terms-of-service/ Scoped to a brochure site with a quote form
     owner/              Staff area — its own shell, no marketing chrome, noindex
       login/            Sign in
       quotes/           Quote list, and one page per request
@@ -279,6 +290,7 @@ src/
     photos.ts           Photography slots on the postcard mockups
     productDetails.ts   Per-product page content and option groups
   components/
+    content/            Steps, FeatureGrid and Prose — shared by the content pages
     brand/              mark.ts (the tooth paths), ToothMark, Logo lockup
     ui/                 Container, Button, SectionHeading, icons
     layout/             Header (with mobile menu), Footer
@@ -318,19 +330,22 @@ the server's values second, which keeps one component correct in both.
 
 `/printing-products/[slug]` renders every product through a single template.
 What differs between products is data in `src/content/productDetails.ts`, never
-layout: gallery views, option groups and detail copy are declared per product,
+layout: gallery views, customization and detail copy are declared per product,
 and a section with no data simply is not rendered. Only Business Cards is
 authored so far; the other eleven fall back to their catalogue entry and get
 their name, artwork and a quote action without inventing anything.
 
-**No specifications or prices are authored anywhere.** An option group declares
-that a product is ordered by, say, paper type, and carries `status: "pending"`
-until the supplier confirms the values. A pending group renders as a real but
-disabled control showing only its placeholder, beside a notice that
-specifications are being finalised — never as a list of choices that look
-orderable. Supplier costs and retail prices must never be written into that
-module: it is imported by client components, so any value in it ships to the
-browser. Commercial figures belong in the database, read in a server component.
+**No specifications or prices are authored anywhere.** `customization` lists the
+dimensions a job is specified by — "Size", "Paper type and finish", "Quantity" —
+which are the questions we ask, never the answers. Claiming a particular stock
+or weight is available is not ours to say until the supplier confirms it, and a
+test fails the build if a paper weight or turnaround time appears on the page.
+
+These pages carry no form controls at all. The product page's job is to explain
+the product and send the visitor to the quote form, so there is nothing to
+configure and nothing disabled implying that configuring is coming. Supplier
+costs and retail prices must never be written into this module: it is imported
+by client components, so any value in it ships to the browser.
 
 ### Why `src/content` matters
 
@@ -363,67 +378,71 @@ flat-lay and the product tiles. Shared gradients and clip paths live in
 
 ### Working
 
-- Homepage, fully responsive, verified at 360px, 390px, 768px, 1280px and 1440px
-- Product pages for all 12 products at `/printing-products/<slug>`, with
-  breadcrumbs and a keyboard-operable gallery. Business Cards is the fully
-  authored example
-- Printing Products (`/printing-products`): all 12 products, working search
-  (case-insensitive, whitespace-tolerant, Enter or button), category filtering
-  from the desktop sidebar and a mobile Filter Products dialog, the two
-  combined, an empty state and Clear Search — all resolved server-side, so a
+- **Home**, fully responsive, verified at 360px, 390px, 768px, 1280px and 1440px
+- **Printing Products** (`/printing-products`): all 12 products, working search,
+  category filtering from the desktop sidebar and a mobile Filter Products
+  dialog, an empty state and Clear Search — all resolved server-side, so a
   filtered URL arrives filtered
-- Header: desktop navigation, and a mobile menu that opens, locks page scroll,
-  closes on Escape or on navigating
-- FAQ accordion: keyboard operable, items toggle independently
-- Every navigation link routes correctly; destinations that are not built yet
-  land on a branded placeholder page
-- Footer with product, marketing, company, legal and account links
-- **Request a Quote** (`/request-a-quote`): a working form that validates on the
-  server, saves to PostgreSQL, sends the owner notification and the customer
-  confirmation, and shows a confirmation page with the real reference. Every
-  Request a Quote button on all 12 product pages opens it with that product
-  already selected. No account is needed, and none is offered
-- **Owner sign-in and staff area** (`/owner`): the quote list, one page per
-  request, status changes, internal notes, and per-recipient email delivery
-  state with a retry. Protected at the page, action and query level
+- **Product pages** for all 12 products at `/printing-products/<slug>`, with a
+  keyboard-operable gallery. Customization is explained in prose; there are no
+  form controls on these pages at all
+- **Request a Quote** (`/request-a-quote`): validated on the server, saved to
+  PostgreSQL, owner notification and customer confirmation emailed, confirmation
+  page with the real reference. Every quote button across the site opens it with
+  the right product selected. No account needed, and none offered
+- **Direct Mail**, **Custom Design**, **How It Works**, **About**, **Contact**,
+  **Privacy Policy**, **Terms of Service**
+- **Owner area** (`/owner`): sign-in, quote list, per-request detail, status
+  changes, internal notes, per-recipient email state with retry
+- Every link in the header and footer resolves to a real page — enforced by a
+  test that crawls them
 
-All of the above is verified by the Playwright suite against a real PostgreSQL
-database: persistence, both emails, authorization, session revocation, role
-separation and the rate limiters are exercised, not mocked. **Delivery to a real
-inbox is the one thing not tested**, because no Resend credential exists here.
+All of it is verified by the Playwright suite against a real PostgreSQL:
+persistence, both emails, authorization, session revocation, role separation and
+both rate limiters are exercised, not mocked. **Delivery to a real inbox is the
+one thing not tested**, because no Resend credential exists here.
 
-### Not built yet
+### Deliberately not built
 
-Direct Mail, New Practice Packages, Custom Design, How It Works, About, Contact,
-site-wide search, customer registration and login, staff invitations, the
-shopping cart and checkout, payments, Privacy Policy, Terms of Service, and the
-admin dashboard. **The cart badge is a static zero — there is no cart**, no
-product can be configured, priced or ordered, and there is no artwork upload.
+Customer accounts, customer login, shopping cart, checkout, payments, customer
+dashboard, online proof management, order tracking, online pricing or
+configuration, and an admin dashboard. These are **not** "coming soon" — the
+business sells by quote, and no part of the UI may imply otherwise.
 
-The database is shaped for practices, locations and memberships, but no
-interface creates them yet: a quote request stands on its own until a later
-phase attaches it to an organization.
+The database carries organization, location and membership tables from an
+earlier design. They are unused, and no interface creates them. They cost
+nothing to leave in place and would be the right shape if practice accounts are
+ever wanted; until then a quote request stands entirely on its own.
 
-## Planned phases
+### The owner area is frozen
 
-Phase 1 is approved. **The remaining phases are a sketch of the likely order, not
-an approved plan.** Pages are specified and approved one at a time: do not build
-a page from this list without its own design and requirements from the owner.
+`/owner` is an internal utility for reading quote requests, changing a status and
+adding a note. It is not an admin platform and should not grow into one. Product
+data, pricing and customers all stay out of it.
 
-1. **Homepage + design system** — approved
-2. **Printing Products catalogue** — approved
-3. **Product detail pages** — approved
-4. **Request a Quote, with the database and owner sign-in it needs** — built,
-   awaiting review
-5. Remaining public pages, one at a time: direct mail, packages, design, about,
-   contact, legal pages
-6. The admin dashboard on the existing database: products, retail pricing,
-   wholesale costs, orders, payments, artwork, proofs, campaigns, fulfillment,
-   revenue and gross profit
-7. Customer accounts on the existing organization model: registration, staff
-   invitations, multiple locations, artwork library, proof approval, order
-   history and reordering
-8. Cart, checkout and payments
+## Rules the public site holds to
+
+These are enforced by tests, not just convention:
+
+- **No ecommerce chrome.** No cart, no account link, no search box, no disabled
+  "configure your order" controls. A test asserts each is absent.
+- **No dead links.** A test crawls every header and footer link and fails if any
+  returns an error or lands on the 404 page.
+- **No invented specifics.** No paper weights, coatings, turnaround times,
+  prices, testimonials, customer counts or guaranteed marketing results appear
+  anywhere. Product pages name the *dimensions* a job is specified by — "Size",
+  "Paper type and finish" — never claimed stock.
+- **No supplier information.** Supplier identity, wholesale costs and margins
+  never appear in customer-facing code.
+- **No invented contact details.** `contact` in `src/content/site.ts` is empty
+  until real values are supplied; components omit the row rather than fill it in.
+- **Request a Quote is the primary action** on every page that has one.
+
+## Planned next
+
+1. Owner supplies real contact details for `src/content/site.ts`
+2. Legal review of the Privacy Policy and Terms drafts
+3. Deploy to Railway and configure the production environment
 
 Supplier orders are submitted manually; no supplier API is assumed. Supplier
 identity, wholesale costs and margins never appear in customer-facing code.

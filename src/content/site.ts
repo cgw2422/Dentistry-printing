@@ -1,17 +1,18 @@
 /**
- * Static site content for Phase 1 (homepage only).
+ * Static site content: brand details and navigation.
  *
  * Everything in `src/content` is deliberately plain, typed data rather than
- * hard-coded JSX. When the admin dashboard and database land, these modules
- * become the seam: each export is replaced by a Prisma query returning the
- * same shape, and no component has to change.
+ * hard-coded JSX, so content changes never require touching a component.
+ *
+ * Nothing in here may point at a page that does not exist. This is a lead
+ * generation site: a visitor who clicks "About" and lands on a placeholder
+ * does not come back to fill in the quote form. Add the link when the page
+ * ships, not before.
  */
 
 export type NavLink = {
   label: string;
   href: string;
-  /** True once the destination page actually exists. */
-  built?: boolean;
 };
 
 export const brand = {
@@ -21,12 +22,27 @@ export const brand = {
     "Nationwide printing and direct mail for dental practices — from everyday practice essentials to complete new-patient campaigns.",
 } as const;
 
-/** Primary navigation. Mirrors the long-term public site structure. */
+/**
+ * Contact details, as configured by the owner.
+ *
+ * Every field is deliberately optional and empty until real values are
+ * supplied. Nothing here may be invented: a fabricated phone number or address
+ * on a printing company's site is worse than none at all. Components check for
+ * a value and simply omit the row when it is absent, so filling one of these in
+ * is the only step needed to make it appear everywhere it belongs.
+ */
+export const contact: {
+  email?: string;
+  phone?: string;
+  /** Free-form, e.g. "Austin, TX". Not a full mailing address unless set. */
+  location?: string;
+} = {};
+
+/** Primary navigation. Every entry is a page that exists. */
 export const primaryNav: NavLink[] = [
-  { label: "Home", href: "/", built: true },
-  { label: "Printing Products", href: "/printing-products", built: true },
+  { label: "Home", href: "/" },
+  { label: "Printing Products", href: "/printing-products" },
   { label: "Direct Mail", href: "/direct-mail" },
-  { label: "New Practice Packages", href: "/new-practice-packages" },
   { label: "Custom Design", href: "/custom-design" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "About", href: "/about" },
@@ -51,7 +67,6 @@ export const footerNav: { heading: string; links: NavLink[] }[] = [
     links: [
       { label: "Direct Mail Campaigns", href: "/direct-mail" },
       { label: "New-Patient Postcards", href: "/printing-products/direct-mail-postcards" },
-      { label: "New Practice Packages", href: "/new-practice-packages" },
       { label: "Custom Graphic Design", href: "/custom-design" },
       { label: "Request a Quote", href: "/request-a-quote" },
     ],
@@ -62,7 +77,6 @@ export const footerNav: { heading: string; links: NavLink[] }[] = [
       { label: "About", href: "/about" },
       { label: "How It Works", href: "/how-it-works" },
       { label: "Contact", href: "/contact" },
-      { label: "My Account", href: "/account" },
       { label: "Privacy Policy", href: "/privacy-policy" },
       { label: "Terms of Service", href: "/terms-of-service" },
     ],

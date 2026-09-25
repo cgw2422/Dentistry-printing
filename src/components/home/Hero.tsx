@@ -40,21 +40,21 @@ export function Hero() {
 
             <div className="mt-6 flex flex-col gap-3 sm:mt-7 sm:flex-row sm:flex-wrap sm:gap-4">
               <Button
-                href="/printing-products"
+                href="/request-a-quote"
                 variant="onDark"
                 size="lg"
                 withArrow
                 className="w-full sm:w-auto"
               >
-                Shop Printing Products
+                Request a Quote
               </Button>
               <Button
-                href="/direct-mail"
+                href="/printing-products"
                 variant="secondary"
                 size="lg"
                 className="w-full sm:w-auto"
               >
-                Start a Direct Mail Campaign
+                Browse Printing Products
               </Button>
             </div>
 

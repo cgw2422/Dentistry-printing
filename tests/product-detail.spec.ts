@@ -150,33 +150,29 @@ test.describe("product gallery", () => {
 });
 
 test.describe("configuration and pricing", () => {
-  test("shows the declared option groups as real, disabled controls", async ({ page }) => {
+  test("names the dimensions a job is specified by, without inventing values", async ({ page }) => {
     await page.goto(BUSINESS_CARDS);
 
-    for (const [label, placeholder] of [
-      ["Size", "Choose a size"],
-      ["Paper Type", "Choose a paper type"],
-      ["Quantity", "Choose a quantity"],
-    ]) {
-      const select = page.getByLabel(label, { exact: true });
-      await expect(select).toBeVisible();
-      await expect(select).toBeDisabled();
-      // Only the placeholder: no invented sizes, papers or quantities.
-      await expect(select.locator("option")).toHaveCount(1);
-      await expect(select.locator("option")).toHaveText(placeholder);
+    for (const dimension of ["Size", "Paper type and finish", "Quantity"]) {
+      await expect(page.getByText(dimension, { exact: true })).toBeVisible();
     }
+
+    // These are the questions we ask, never claimed stock. No specific paper
+    // weight, coating or turnaround may appear.
+    const body = await page.locator("body").innerText();
+    expect(body).not.toMatch(/\b\d+\s?(lb|gsm|pt)\b/i);
+    expect(body).not.toMatch(/\b\d+[-\s]?(business\s)?day\b/i);
   });
 
-  test("says plainly that specifications are being finalised", async ({ page }) => {
+  test("offers no form controls at all — this page does not take orders", async ({ page }) => {
     await page.goto(BUSINESS_CARDS);
-    await expect(
-      page.getByText(/Sizes, paper types and quantities for business cards are being finalised/i),
-    ).toBeVisible();
+    await expect(page.locator("main select")).toHaveCount(0);
+    await expect(page.locator("main input")).toHaveCount(0);
   });
 
-  test("shows a price area with no fabricated figures", async ({ page }) => {
+  test("states pricing is by quote, with no fabricated figures", async ({ page }) => {
     await page.goto(BUSINESS_CARDS);
-    await expect(page.getByText("Pricing available upon request.")).toBeVisible();
+    await expect(page.getByText("Pricing is quoted per job.")).toBeVisible();
 
     const body = await page.locator("body").innerText();
     expect(body).not.toMatch(/\$\s?\d/);
@@ -203,23 +199,38 @@ test.describe("configuration and pricing", () => {
     await expect(page.getByRole("link", { name: /add to cart/i })).toHaveCount(0);
   });
 
-  test("the cart badge in the header is untouched", async ({ page }) => {
+  test("no ecommerce chrome anywhere on the page", async ({ page }) => {
     await page.goto(BUSINESS_CARDS);
-    await expect(page.getByRole("link", { name: "Shopping cart, 0 items" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /cart/i })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /my account/i })).toHaveCount(0);
+    // The old configurator rendered disabled selects that looked orderable.
+    await expect(page.locator("select:disabled")).toHaveCount(0);
+    await expect(page.getByText(/being finalised/i)).toHaveCount(0);
+  });
+
+  test("customization is explained rather than offered as dead controls", async ({ page }) => {
+    await page.goto(BUSINESS_CARDS);
+    await expect(page.getByRole("heading", { name: "Customize Your Order" })).toBeVisible();
+    await expect(page.getByText("Paper type and finish")).toBeVisible();
+    await expect(page.getByText(/Pricing is quoted per job/i)).toBeVisible();
   });
 });
 
 test.describe("artwork and custom design", () => {
   test("explains both artwork routes without a file upload", async ({ page }) => {
     await page.goto(BUSINESS_CARDS);
-    await expect(page.getByRole("heading", { name: "Upload Your Artwork" })).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Request Design Assistance", exact: true }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Already Have Artwork" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Need a Design" })).toBeVisible();
     await expect(page.locator('input[type="file"]')).toHaveCount(0);
+
+    // Artwork arrives with the quote conversation. Nothing may suggest that
+    // uploading to a practice account is a thing this site does.
+    const body = await page.locator("body").innerText();
+    expect(body).not.toMatch(/practice account/i);
+    expect(body).not.toMatch(/ordering system/i);
   });
 
-  test("design links point at the future Custom Design page", async ({ page }) => {
+  test("design links point at the Custom Design page", async ({ page }) => {
     await page.goto(BUSINESS_CARDS);
     for (const name of [/Request Design Assistance/, /Explore design services/, /Request Custom Design/]) {
       await expect(page.getByRole("link", { name }).first()).toHaveAttribute("href", "/custom-design");
@@ -252,12 +263,14 @@ test.describe("the shared template", () => {
     await expect(page.getByText("Perfect for waiting rooms and front desks.")).toBeVisible();
   });
 
-  test("gives products without confirmed options no configuration fields", async ({ page }) => {
+  test("a product with no authored customization still converts", async ({ page }) => {
     await page.goto("/printing-products/rack-cards");
-    await expect(page.getByText("Select Options")).toHaveCount(0);
-    await expect(page.locator("select")).toHaveCount(0);
-    // It still gets pricing status and a way to ask.
-    await expect(page.getByText("Pricing available upon request.")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Customize Your Order" })).toHaveCount(0);
+    // It still gets the pricing statement and a way to ask.
+    await expect(page.getByText("Pricing is quoted per job.")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Request a Quote/ }).first(),
+    ).toBeVisible();
   });
 
   test("an unknown product slug is a 404", async ({ page }) => {

@@ -6,35 +6,13 @@ import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
-import { CartIcon, CloseIcon, MenuIcon, Search, UserIcon } from "@/components/ui/icons";
+import { CloseIcon, MenuIcon } from "@/components/ui/icons";
 import { primaryNav } from "@/content/site";
 
 /** "/" matches only itself; other entries also match their sub-routes. */
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-/**
- * Cart indicator. The cart itself is not implemented in this phase — the link
- * lands on the "coming in a later phase" page, and the count is a static zero.
- */
-function CartLink({ className = "" }: { className?: string }) {
-  return (
-    <Link
-      href="/cart"
-      aria-label="Shopping cart, 0 items"
-      className={`relative inline-flex h-11 w-11 items-center justify-center rounded-full text-navy transition-colors hover:bg-mist ${className}`}
-    >
-      <CartIcon className="h-6 w-6" />
-      <span
-        aria-hidden="true"
-        className="absolute right-1 top-1 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-teal px-1 text-[0.625rem] font-bold leading-none text-white"
-      >
-        0
-      </span>
-    </Link>
-  );
 }
 
 export function Header() {
@@ -97,25 +75,9 @@ export function Header() {
             </ul>
           </nav>
 
-          <div className="ml-auto hidden flex-col items-end gap-1.5 xl:flex">
-            <div className="flex items-center gap-1">
-              <Link
-                href="/search"
-                aria-label="Search"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full text-navy transition-colors hover:bg-mist"
-              >
-                <Search className="h-5 w-5" />
-              </Link>
-              <span aria-hidden="true" className="h-5 w-px bg-line" />
-              <Link
-                href="/account"
-                className="inline-flex min-h-11 items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-navy transition-colors hover:bg-mist"
-              >
-                <UserIcon className="h-5 w-5" />
-                My Account
-              </Link>
-              <CartLink />
-            </div>
+          {/* The only header action: this site sells by quote, so nothing
+              competes with the one conversion. */}
+          <div className="ml-auto hidden items-center xl:flex">
             <Button href="/request-a-quote" size="md" className="px-6">
               Request a Quote
             </Button>
@@ -123,7 +85,6 @@ export function Header() {
 
           {/* ---- Compact header controls ---- */}
           <div className="ml-auto flex items-center gap-0.5 xl:hidden">
-            <CartLink />
             <button
               ref={toggleRef}
               type="button"
@@ -187,14 +148,6 @@ export function Header() {
                   >
                     Request a Quote
                   </Button>
-                  <Link
-                    href="/account"
-                    onClick={() => setOpen(false)}
-                    className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-[0.9375rem] font-semibold text-navy ring-1 ring-inset ring-navy/25"
-                  >
-                    <UserIcon className="h-5 w-5" />
-                    My Account
-                  </Link>
                 </div>
               </nav>
             </Container>

@@ -56,7 +56,7 @@ export default async function PrintingProductsPage({
         title="Ready to Get Started?"
         body="Explore our printing products or tell us what you need. We'll help you find the right solution for your practice."
         // A bare catalogue link: no query, no category, so it clears both.
-        primary={{ label: "Shop All Products", href: `${CATALOG_PATH}#${CATALOG_ANCHOR}` }}
+        primary={{ label: "Browse All Products", href: `${CATALOG_PATH}#${CATALOG_ANCHOR}` }}
         secondary={{ label: "Request a Quote", href: "/request-a-quote" }}
       />
     </>

@@ -332,11 +332,11 @@ test.describe("category filtering", () => {
     await expectProducts(page, ["Referral Cards"]);
   });
 
-  test("Shop All Products clears both the search and the category", async ({ page }) => {
+  test("Browse All Products clears both the search and the category", async ({ page }) => {
     await page.goto(`${CATALOG}?q=postcard&category=direct-mail-postcards`);
     await expect(cards(page)).toHaveCount(1);
 
-    await page.getByRole("link", { name: "Shop All Products" }).click();
+    await page.getByRole("link", { name: "Browse All Products" }).click();
     await expect(cards(page)).toHaveCount(12);
 
     const params = new URL(page.url()).searchParams;

@@ -29,21 +29,6 @@ export const Search = ({ className }: IconProps) => (
   </svg>
 );
 
-export const UserIcon = ({ className }: IconProps) => (
-  <svg {...S} className={className}>
-    <circle cx="12" cy="8" r="3.75" />
-    <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
-  </svg>
-);
-
-export const CartIcon = ({ className }: IconProps) => (
-  <svg {...S} className={className}>
-    <path d="M2.5 3.5h2.2l2.3 11h10.2l2.3-8H6" />
-    <circle cx="9" cy="19.2" r="1.5" />
-    <circle cx="17" cy="19.2" r="1.5" />
-  </svg>
-);
-
 export const MenuIcon = ({ className }: IconProps) => (
   <svg {...S} strokeWidth={2} className={className}>
     <path d="M3.5 7h17" />

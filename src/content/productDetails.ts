@@ -1,73 +1,40 @@
 /**
- * Per-product content and configuration for the product-detail pages.
+ * Per-product content for the product-detail pages.
  *
- * This is the seam the admin dashboard and database will replace: every page
- * is rendered by one template that reads from here, so adding a product is a
- * data change, not a new page.
+ * Every page is rendered by one template that reads from here, so adding a
+ * product is a data change, not a new page.
  *
  * ── What deliberately is NOT in this file ────────────────────────────────
- * No sizes, paper types, finishes, quantities, coatings, print methods,
- * production times or prices are authored here, because none have been
- * verified with the supplier. An option group with no values renders as a
- * disabled control alongside a notice that specifications are being
- * finalised — never as a list of choices that look orderable.
+ * No sizes, paper weights, finishes, coatings, print methods, production
+ * times or prices are authored here, because none have been verified with the
+ * supplier. `customization` names the dimensions a job is specified by — the
+ * questions we will ask — never the answers. "Paper Type" is a thing you can
+ * choose; claiming a particular stock is available is not ours to say yet.
  *
- * Supplier costs and retail prices must never be written into this module.
- * It is imported by client components, so anything with a value in it is
- * shipped to the browser. Commercial figures belong in the database, read in
- * a server component. The types below exist so the shape is ready for them.
+ * This site does not sell online. There is no cart, no configured pricing and
+ * no checkout, so nothing here drives an order form: the page explains the
+ * product and sends the visitor to Request a Quote.
+ *
+ * Supplier costs and retail prices must never be written into this module. It
+ * is imported by client components, so anything with a value in it is shipped
+ * to the browser.
  */
 
 import type { GalleryViewKey } from "@/components/mockups/galleryArt";
 import { findProduct, type ProductEntry } from "./products";
 
 /* ------------------------------------------------------------------ */
-/* Configuration model                                                 */
+/* Customization                                                       */
 /* ------------------------------------------------------------------ */
 
-/** A single choice within an option group, e.g. one paper type. */
-export type OptionValue = {
-  id: string;
-  label: string;
-  /** Extra detail shown beside the label once confirmed, e.g. a dimension. */
-  note?: string;
-  /** Supplier-confirmed availability. Unavailable values are not offered. */
-  available?: boolean;
-};
-
-/** A quantity break, e.g. 250 / 500 / 1000. Prices come from the database. */
-export type QuantityTier = {
-  id: string;
-  quantity: number;
-  label: string;
-};
-
-export type OptionGroupKind = "choice" | "quantity";
-
 /**
- * One configurable dimension of a product. `status` is what decides whether
- * the page can offer it: "pending" means the supplier has not confirmed the
- * values yet, so the control renders disabled rather than inventing choices.
+ * One dimension a job is specified by, e.g. "Size" or "Paper Type".
+ *
+ * Deliberately a plain label and nothing more. These are printed as a short
+ * list so a visitor knows what is adjustable before they ask, and they become
+ * the things we confirm on the quote. They are not a form.
  */
-export type OptionGroup = {
-  id: string;
-  label: string;
-  /** Placeholder shown when nothing is selected, e.g. "Choose a size". */
-  placeholder: string;
-  kind: OptionGroupKind;
-  status: "pending" | "available";
-  /** Empty while `status` is "pending". */
-  values: OptionValue[];
-  tiers?: QuantityTier[];
-  /** Finishing upgrades and similar extras the customer may skip. */
-  optional?: boolean;
-};
-
-/** Supplied by the database once configured; never authored in source. */
-export type ProductCommercials = {
-  retailFrom?: never;
-  supplierCost?: never;
-};
+export type CustomizationOption = string;
 
 /** Verified only. Absent means we say nothing about timing. */
 export type ProductionEstimate = {
@@ -105,7 +72,7 @@ export type ProductDetail = {
   description: string;
   highlights: ProductHighlight[];
   gallery: GalleryView[];
-  optionGroups: OptionGroup[];
+  customization: CustomizationOption[];
   details?: { intro: string; points: string[] };
   /** Set false to take a product off sale without deleting it. */
   active: boolean;
@@ -158,34 +125,9 @@ const details: Record<string, ProductDetail> = {
         alt: "A stack of business cards at an angle, with a single card showing its reverse.",
       },
     ],
-    // Declared because these are the dimensions a business card is ordered by.
-    // No values: the supplier has not confirmed them, so nothing is offered.
-    optionGroups: [
-      {
-        id: "size",
-        label: "Size",
-        placeholder: "Choose a size",
-        kind: "choice",
-        status: "pending",
-        values: [],
-      },
-      {
-        id: "paper-type",
-        label: "Paper Type",
-        placeholder: "Choose a paper type",
-        kind: "choice",
-        status: "pending",
-        values: [],
-      },
-      {
-        id: "quantity",
-        label: "Quantity",
-        placeholder: "Choose a quantity",
-        kind: "quantity",
-        status: "pending",
-        values: [],
-      },
-    ],
+    // The dimensions a business card job is specified by — what we will ask
+    // about, not what we claim to stock.
+    customization: ["Size", "Paper type and finish", "Quantity", "Single or double sided"],
     details: {
       intro:
         "Business cards are what your team hands to a patient at the front desk, leaves with a referring practice, or includes with a treatment plan. We print them for the whole practice — one design across every provider, or a separate card for each member of the team.",
@@ -207,14 +149,12 @@ const details: Record<string, ProductDetail> = {
 export type ResolvedProduct = {
   product: ProductEntry;
   detail: ProductDetail;
-  /** True when at least one option group has supplier-confirmed values. */
-  hasConfiguredOptions: boolean;
 };
 
 /**
  * The content a product page renders, falling back to the catalogue entry for
  * products that have no authored detail yet. Those still get their name,
- * description, artwork and a quote action — just no configuration section.
+ * description, artwork and a quote action — just no customization list.
  */
 export function resolveProduct(slug: string): ResolvedProduct | null {
   const product = findProduct(slug);
@@ -228,15 +168,9 @@ export function resolveProduct(slug: string): ResolvedProduct | null {
     description: product.blurb,
     highlights: SHARED_HIGHLIGHTS,
     gallery: [],
-    optionGroups: [],
+    customization: [],
     active: true,
   };
 
-  return {
-    product,
-    detail,
-    hasConfiguredOptions: detail.optionGroups.some(
-      (group) => group.status === "available" && group.values.length > 0,
-    ),
-  };
+  return { product, detail };
 }

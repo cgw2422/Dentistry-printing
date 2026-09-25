@@ -22,13 +22,13 @@ export function NewPracticePackages() {
 
             <div className="mt-7 flex lg:mt-9">
               <Button
-                href="/new-practice-packages"
+                href="/request-a-quote?product=new-practice-package"
                 variant="onDark"
                 size="lg"
                 withArrow
                 className="w-full sm:w-auto"
               >
-                Explore New Practice Packages
+                Quote a New Practice Package
               </Button>
             </div>
           </div>

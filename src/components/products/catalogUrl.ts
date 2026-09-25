@@ -3,7 +3,7 @@ import { ALL_PRODUCTS } from "@/content/products";
 /**
  * Search and category live in the URL rather than component state, so the two
  * controls stay in sync without sharing a parent, filters survive a refresh or
- * a shared link, the browser back button works, and "Shop All Products" can
+ * a shared link, the browser back button works, and "Browse All Products" can
  * clear everything simply by linking to the bare route.
  */
 export const CATALOG_PATH = "/printing-products";

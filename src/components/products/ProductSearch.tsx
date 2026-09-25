@@ -22,7 +22,7 @@ export function ProductSearch({
   const { query, category } = useCatalogFilters(serverQuery, serverCategory);
 
   // Keying on the committed query remounts the field whenever the URL changes
-  // from elsewhere — a category link, "Shop All Products", or the back button —
+  // from elsewhere — a category link, "Browse All Products", or the back button —
   // so the box always shows the search that is actually applied.
   return <SearchForm key={query} initialQuery={query} category={category} />;
 }
