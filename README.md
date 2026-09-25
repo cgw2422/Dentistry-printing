@@ -231,6 +231,14 @@ procedure, not a report.** With a database now in play the steps are:
 
 No payment setup is needed; none exists.
 
+**The app refuses to start without `DATABASE_URL` and `AUTH_SECRET`**, and says
+which one is missing (`src/instrumentation.ts`). That is deliberate. Without
+them every page still renders and the quote form still appears, but submitting
+crashes — so the alternative is a site that looks finished and silently cannot
+capture a single lead. A deploy that fails on boot gets noticed; an invisible
+one does not. Email variables are not required: unconfigured, sending is
+recorded as `SKIPPED` and the request is still saved.
+
 **Do not put Next's static-export mode in `next.config.ts`** — not in a comment,
 and not in a conditional branch that is switched off by default. Railway's
 builder scans that file as text rather than evaluating it; if it finds the

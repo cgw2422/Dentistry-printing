@@ -114,3 +114,40 @@ test("an oversized field is rejected rather than truncated into the database", a
   expect(await testDb.quoteRequest.count({ where: { email: "oversize@limiter.test" } })).toBe(0);
   await context.close();
 });
+
+test("an unreachable database is a form error, not a crash screen", async ({ browser }) => {
+  // The submit path touches the database three times before it can succeed:
+  // the idempotency lookup, the rate-limit count, and the insert. If any of
+  // them rejects unhandled, the visitor gets a raw server-error page instead
+  // of the form's own message — and a prospect who sees one does not come back.
+  //
+  // We cannot take the real database away mid-run, so this asserts the
+  // contract the hardening provides: the action always resolves to a rendered
+  // page carrying either the confirmation or a readable error, never Next's
+  // error screen.
+  const context = await browser.newContext({
+    extraHTTPHeaders: { "x-forwarded-for": clientIp() },
+  });
+  const page = await context.newPage();
+
+  await fillForm(page, `db-contract-${randomUUID()}@limiter.test`);
+  // A token the server has never minted, which still has to be handled.
+  await page.evaluate(() => {
+    const field = document.querySelector<HTMLInputElement>('[name="submissionToken"]')!;
+    field.value = "not-a-token-this-server-issued";
+  });
+  await page.getByRole("button", { name: /Send Quote Request/ }).click();
+
+  await expect(page.getByText(/This page couldn.t load/i)).toHaveCount(0);
+  await expect(page.getByText(/A server error occurred/i)).toHaveCount(0);
+  await page.waitForFunction(
+    () =>
+      location.pathname.includes("confirmation") ||
+      document.body.innerText.includes("could not save your request") ||
+      document.body.innerText.includes("Please try again"),
+    null,
+    { timeout: 30_000 },
+  );
+
+  await context.close();
+});

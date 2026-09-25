@@ -30,6 +30,12 @@ export type SubmitContext = {
  * round. The database is the record of a quote request; email is a courtesy
  * on top of it, so a mail failure leaves the request saved and reported as
  * successful to the customer.
+ *
+ * Every database call lives inside the try below, including the idempotency
+ * lookup and the rate-limit count. If the database is unreachable this has to
+ * come back as the form's own "we could not save your request" message: an
+ * unhandled rejection here reaches the visitor as a raw server-error screen,
+ * and a prospect who sees one does not try again.
  */
 export async function submitQuoteRequest(
   raw: unknown,
@@ -55,24 +61,24 @@ export async function submitQuoteRequest(
 
   const ipHash = context.ip ? hashIdentifier(context.ip) : null;
 
-  // A repeated POST — double tap, or a retry after a dropped response —
-  // carries the same token and returns the row already written.
-  const existing = await prisma.quoteRequest.findUnique({
-    where: { submissionToken: input.submissionToken },
-  });
-  if (existing) return { ok: true, quote: existing };
-
-  if (ipHash && (await isRateLimited(ipHash))) {
-    return {
-      ok: false,
-      errors: {
-        form: "We have received several requests from this connection. Please wait a little while, or email us directly.",
-      },
-    };
-  }
-
   let quote: QuoteRequest;
   try {
+    // A repeated POST — double tap, or a retry after a dropped response —
+    // carries the same token and returns the row already written.
+    const existing = await prisma.quoteRequest.findUnique({
+      where: { submissionToken: input.submissionToken },
+    });
+    if (existing) return { ok: true, quote: existing };
+
+    if (ipHash && (await isRateLimited(ipHash))) {
+      return {
+        ok: false,
+        errors: {
+          form: "We have received several requests from this connection. Please wait a little while, or email us directly.",
+        },
+      };
+    }
+
     quote = await prisma.quoteRequest.create({
       data: {
         reference: quoteReference(),
@@ -108,11 +114,17 @@ export async function submitQuoteRequest(
     });
   } catch (error) {
     // Two requests with the same token racing each other: the loser reads the
-    // winner's row rather than reporting a failure.
-    const duplicate = await prisma.quoteRequest.findUnique({
-      where: { submissionToken: input.submissionToken },
-    });
-    if (duplicate) return { ok: true, quote: duplicate };
+    // winner's row rather than reporting a failure. This lookup is itself
+    // guarded, because the reason we are here may be that the database is
+    // unreachable — in which case it would throw too.
+    try {
+      const duplicate = await prisma.quoteRequest.findUnique({
+        where: { submissionToken: input.submissionToken },
+      });
+      if (duplicate) return { ok: true, quote: duplicate };
+    } catch {
+      // Fall through to the failure below: we could not read either.
+    }
 
     console.error("[quotes] failed to save request", {
       reason: error instanceof Error ? error.name : "unknown",
